@@ -20,22 +20,22 @@ from handlers import (
     yuk_korish, 
     shofyor_elon, 
     shofyor_korish, 
-    raqam_olish
+    raqam_olish,
+    admin_xabar
 )
 
 # Logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-# Tokeningiz
-TOKEN = '7653469544:AAFH4xoRxu8-_nWy0CR1gXA1Nkv1txt3gqc'
-
-# Bot app
 app = Application.builder().token(TOKEN).build()
 
-# --- COMMANDS ---
-app.add_handler(CommandHandler('start', start.start))
-app.add_handler(CommandHandler('hisobim', hisobim.hisobim_handler))
-app.add_handler(CommandHandler('paketlar', paketlar.paketlar_handler))
+# --- START ---
+app.add_handler(CommandHandler('start', start.boshlash))
+app.add_handler(CommandHandler('boshlash', start.boshlash))
+
+# --- HISOBIM, PAKETLAR ---
+app.add_handler(MessageHandler(filters.Text("💳 Hisobim"), hisobim.hisobim_handler))
+app.add_handler(MessageHandler(filters.Text("🎁 Paketlar"), paketlar.paketlar_handler))
 app.add_handler(CommandHandler('paket_ol', paketlar.paket_ol))
 app.add_handler(CommandHandler('premium', premium_vip.premium_elon))
 app.add_handler(CommandHandler('vip', premium_vip.vip_aktiv))
@@ -79,7 +79,10 @@ app.add_handler(MessageHandler(filters.Regex('🚚 Shofyor e\'lonlarini ko‘ris
 # --- RAQAM OLISH CALLBACK ---
 app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
 
-# --- BOT START ---
+# --- ADMIN XABAR ---
+app.add_handler(MessageHandler(filters.Text("📣 Admin xabar"), admin_xabar.admin_xabar_handler))
+
+# --- START LOG ---
 print("🤖 BobEx Bot to‘liq ishga tushdi...")
 
 app.run_polling()
