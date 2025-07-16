@@ -23,7 +23,7 @@ from handlers import (
     admin_xabar
 )
 
-# Logging
+# Logging konfiguratsiyasi
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 app = Application.builder().token(TOKEN).build()
@@ -36,14 +36,15 @@ app.add_handler(CommandHandler('boshlash', start.boshlash))
 app.add_handler(MessageHandler(filters.Regex("^💳 Hisobim$"), hisobim.hisobim_handler))
 
 # --- HISOBNI TO‘LDIRISH ---
-app.add_handler(ConversationHandler(
+hisob_tolidirish_conv = ConversationHandler(
     entry_points=[MessageHandler(filters.Regex("^Hisobni to‘ldirish$"), hisob_tolidirish.hisobni_tolidirish_start)],
     states={
         hisob_tolidirish.TOLOV_MIqdori: [MessageHandler(filters.TEXT & ~filters.COMMAND, hisob_tolidirish.tolov_miqdori_qabul)],
         hisob_tolidirish.TOLOV_CHEK: [MessageHandler(filters.PHOTO, hisob_tolidirish.tolov_chek_qabul)]
     },
     fallbacks=[MessageHandler(filters.Regex("^⬅️ Orqaga$"), hisob_tolidirish.ortga_qaytish)]
-))
+)
+app.add_handler(hisob_tolidirish_conv)
 
 app.add_handler(MessageHandler(filters.Regex(r'^/tasdiqla_'), hisob_tolidirish.admin_tasdiqlash))
 
@@ -92,8 +93,12 @@ app.add_handler(MessageHandler(filters.Regex("^📦 Yuk e'lonlarini ko‘rish$")
 app.add_handler(MessageHandler(filters.Regex("^🚚 Shofyor e'lonlarini ko‘rish$"), shofyor_korish.shofyor_korish))
 
 # --- RAQAM OLISH CALLBACK ---
-app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))# --- ADMIN XABAR ---
-app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))# --- START LOG ---
+app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
+
+# --- ADMIN XABAR ---
+app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))
+
+# --- START LOG ---
 print("🤖 BobEx Bot to‘liq ishga tushdi...")
 
 app.run_polling()
