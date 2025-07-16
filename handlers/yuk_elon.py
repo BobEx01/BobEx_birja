@@ -95,7 +95,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await narx_qabul(update, context)
 
     context.user_data['telefon'] = update.message.text
-    context.
+    context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     user_data['user_id'] = update.message.from_user.id
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
