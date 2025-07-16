@@ -1,10 +1,8 @@
-# handlers/hisob_tolidirish.py
-
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
 from handlers.start import asosiy_menu
 
-async def hisobni_tolidirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def hisobni_tolidirish_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     text = (
         f"💳 *Hisobni to‘ldirish uchun karta rekvizitlari:*\n\n"
