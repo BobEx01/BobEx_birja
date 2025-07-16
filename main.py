@@ -95,4 +95,9 @@ app.add_handler(MessageHandler(filters.Regex("^🚚 Shofyor e'lonlarini ko‘ris
 app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
 
 # --- ADMIN XABAR ---
-app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.
+app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))
+
+# --- START LOG ---
+print("🤖 BobEx Bot to‘liq ishga tushdi...")
+
+app.run_polling()
