@@ -14,6 +14,7 @@ from config import TOKEN
 from handlers import (
     start, 
     hisobim, 
+    hisob_tolidirish,  # ✅ YANGI: hisobni to‘ldirish handler
     paketlar, 
     premium_vip, 
     yuk_elon, 
@@ -33,19 +34,20 @@ app = Application.builder().token(TOKEN).build()
 app.add_handler(CommandHandler('start', start.boshlash))
 app.add_handler(CommandHandler('boshlash', start.boshlash))
 
-# --- HISOBIM, TO‘LDIRISH, ADMIN TASTIQLASH ---
+# --- HISOBIM ---
 app.add_handler(MessageHandler(filters.Regex("^💳 Hisobim$"), hisobim.hisobim_handler))
 
+# --- HISOBNI TO‘LDIRISH ---
 app.add_handler(ConversationHandler(
-    entry_points=[MessageHandler(filters.Regex("^Hisobni to‘ldirish$"), hisobim.hisobni_tolidirish_start)],
+    entry_points=[MessageHandler(filters.Regex("^Hisobni to‘ldirish$"), hisob_tolidirish.hisobni_tolidirish_start)],
     states={
-        hisobim.TOLOV_MIqdori: [MessageHandler(filters.TEXT & ~filters.COMMAND, hisobim.tolov_miqdori_qabul)],
-        hisobim.TOLOV_CHEK: [MessageHandler(filters.PHOTO, hisobim.tolov_chek_qabul)]
+        hisob_tolidirish.TOLOV_MIqdori: [MessageHandler(filters.TEXT & ~filters.COMMAND, hisob_tolidirish.tolov_miqdori_qabul)],
+        hisob_tolidirish.TOLOV_CHEK: [MessageHandler(filters.PHOTO, hisob_tolidirish.tolov_chek_qabul)]
     },
-    fallbacks=[MessageHandler(filters.Regex("^⬅️ Orqaga$"), hisobim.ortga_qaytish)]
+    fallbacks=[MessageHandler(filters.Regex("^⬅️ Orqaga$"), hisob_tolidirish.ortga_qaytish)]
 ))
 
-app.add_handler(MessageHandler(filters.Regex(r'^/tasdiqla_'), hisobim.admin_tasdiqlash))
+app.add_handler(MessageHandler(filters.Regex(r'^/tasdiqla_'), hisob_tolidirish.admin_tasdiqlash))
 
 # --- PAKETLAR, PREMIUM ---
 app.add_handler(MessageHandler(filters.Regex("^🎁 Paketlar$"), paketlar.paketlar_handler))
@@ -93,9 +95,4 @@ app.add_handler(MessageHandler(filters.Regex("^🚚 Shofyor e'lonlarini ko‘ris
 app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
 
 # --- ADMIN XABAR ---
-app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))
-
-# --- START LOG ---
-print("🤖 BobEx Bot to‘liq ishga tushdi...")
-
-app.run_polling()
+app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.
