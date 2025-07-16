@@ -33,8 +33,21 @@ app = Application.builder().token(TOKEN).build()
 app.add_handler(CommandHandler('start', start.boshlash))
 app.add_handler(CommandHandler('boshlash', start.boshlash))
 
-# --- HISOBIM, PAKETLAR ---
+# --- HISOBIM, TO‘LDIRISH, ADMIN TASTIQLASH ---
 app.add_handler(MessageHandler(filters.Text("💳 Hisobim"), hisobim.hisobim_handler))
+
+app.add_handler(ConversationHandler(
+    entry_points=[MessageHandler(filters.Text("Hisobni to‘ldirish"), hisobim.hisobni_tolidirish_start)],
+    states={
+        hisobim.TOLOV_MIqdori: [MessageHandler(filters.TEXT & ~filters.COMMAND, hisobim.tolov_miqdori_qabul)],
+        hisobim.TOLOV_CHEK: [MessageHandler(filters.PHOTO, hisobim.tolov_chek_qabul)]
+    },
+    fallbacks=[MessageHandler(filters.Text("⬅️ Orqaga"), hisobim.ortga_qaytish)]
+))
+
+app.add_handler(MessageHandler(filters.Regex(r'^/tasdiqla_'), hisobim.admin_tasdiqlash))
+
+# --- PAKETLAR, PREMIUM ---
 app.add_handler(MessageHandler(filters.Text("🎁 Paketlar"), paketlar.paketlar_handler))
 app.add_handler(CommandHandler('paket_ol', paketlar.paket_ol))
 app.add_handler(CommandHandler('premium', premium_vip.premium_elon))
@@ -72,7 +85,7 @@ shofyor_elon_conv = ConversationHandler(
 )
 app.add_handler(shofyor_elon_conv)
 
-# --- KORISH ---
+# --- E'LON KO‘RISH ---
 app.add_handler(MessageHandler(filters.Regex('📦 Yuk e\'lonlarini ko‘rish'), yuk_korish.yuk_korish))
 app.add_handler(MessageHandler(filters.Regex('🚚 Shofyor e\'lonlarini ko‘rish'), shofyor_korish.shofyor_korish))
 
