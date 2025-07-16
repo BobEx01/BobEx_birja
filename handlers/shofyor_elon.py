@@ -257,4 +257,18 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
 
 
 # Callback uchun uzaytirish
-async def uzaytirish_callback(update:
+async def uzaytirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data.split('_')
+    user_id, sanasi = data[1], data[2]
+
+    cursor.execute("UPDATE shofyor_elonlar SET sanasi=? WHERE user_id=? AND sanasi=?", (
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        user_id,
+        sanasi
+    ))
+    conn.commit()
+
+    await query.edit_message_text("✅ E'loningiz muddati yana 24 soatga uzaytirildi.")
