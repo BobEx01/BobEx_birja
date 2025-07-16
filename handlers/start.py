@@ -3,7 +3,8 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
 
-async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# Asosiy menyu funksiyasi
+def asosiy_menu():
     keyboard = [
         ["🚛 Yuk uchun e'lon berish"],
         ["🚚 Shofyor e'lon berish"],
@@ -12,9 +13,10 @@ async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ["💳 Hisobim"],
         ["🎁 Paketlar"]
     ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
+# /start komandasi uchun funksiya
+async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "👋 Assalomu alaykum, BobEx botiga xush kelibsiz!\n\n"
         "Quyidagi menyulardan birini tanlang:\n\n"
@@ -24,5 +26,5 @@ async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🚚 Shofyor e'lonlarini ko‘rish\n"
         "💳 Hisobim — balans va hisob to‘ldirish\n"
         "🎁 Paketlar — VIP tarif va bonus paketlar",
-        reply_markup=reply_markup
+        reply_markup=asosiy_menu()
     )
