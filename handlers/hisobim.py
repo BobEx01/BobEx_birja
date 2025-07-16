@@ -1,6 +1,8 @@
+# handlers/hisobim.py
+
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
-from database import cursor, conn
+from database import cursor
 from handlers.start import asosiy_menu
 
 async def hisobim_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
