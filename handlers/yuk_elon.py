@@ -103,7 +103,7 @@ async def narx_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return "telefon"
 
 # ➡️ 9.
-Telefon raqam va saqlash
+# Telefon raqam va saqlash
 async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
         return await narx_qabul(update, context)
