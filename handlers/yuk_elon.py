@@ -1,8 +1,7 @@
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-
-  from database import cursor, conn
-
-    from handlers import (
+from telegram.ext import ContextTypes
+from database import cursor, conn
+import datetime
 
   File "/app/handlers/yuk_elon.py", line 99
 
