@@ -4,6 +4,7 @@ import datetime
 import asyncio
 from database import cursor, conn
 
+
 def main_menu_keyboard():
     keyboard = [
         ["➕ Yuk joylash", "🚚 Yuklarni ko‘rish"],
@@ -13,6 +14,7 @@ def main_menu_keyboard():
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
+
 def viloyatlar_keyboard():
     viloyatlar = ["Toshkent", "Andijon", "Farg'ona", "Namangan",
                   "Samarqand", "Buxoro", "Navoiy", "Qashqadaryo",
@@ -20,6 +22,7 @@ def viloyatlar_keyboard():
     keyboard = [[viloyat] for viloyat in viloyatlar]
     keyboard.append(["⬅️ Orqaga"])
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
 
 def back_button():
     return ReplyKeyboardMarkup([["⬅️ Orqaga"]], resize_keyboard=True)
@@ -29,6 +32,7 @@ async def yuk_elon_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("📍 Viloyatni tanlang:", reply_markup=viloyatlar_keyboard())
     return "viloyat"
 
+
 async def viloyat_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
         return await yuk_elon_start(update, context)
@@ -36,6 +40,7 @@ async def viloyat_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['viloyat'] = update.message.text
     await update.message.reply_text("📍 Tumaningizni kiriting:", reply_markup=back_button())
     return "tuman"
+
 
 async def tuman_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
@@ -45,6 +50,7 @@ async def tuman_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🚩 Yuk qayerdan jo‘natiladi?", reply_markup=back_button())
     return "qayerdan"
 
+
 async def qayerdan_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
         return await tuman_qabul(update, context)
@@ -52,6 +58,7 @@ async def qayerdan_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['qayerdan'] = update.message.text
     await update.message.reply_text("🚩 Yuk qayerga boradi?", reply_markup=back_button())
     return "qayerga"
+
 
 async def qayerga_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
@@ -61,6 +68,7 @@ async def qayerga_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("⚖️ Yuk og‘irligini kiriting (kg yoki tonna):", reply_markup=back_button())
     return "ogirlik"
 
+
 async def ogirlik_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
         return await qayerga_qabul(update, context)
@@ -69,6 +77,7 @@ async def ogirlik_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🚚 Qanday mashina kerak?", reply_markup=back_button())
     return "mashina"
 
+
 async def mashina_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
         return await ogirlik_qabul(update, context)
@@ -76,6 +85,7 @@ async def mashina_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['mashina'] = update.message.text
     await update.message.reply_text("💵 Shofyor uchun to‘lov miqdorini kiriting (so‘m):", reply_markup=back_button())
     return "narx"
+
 
 async def narx_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
@@ -90,20 +100,21 @@ async def narx_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("📞 Telefon raqamingizni kiriting:", reply_markup=back_button())
     return "telefon"
 
+
 async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
         return await narx_qabul(update, context)
 
     context.user_data['telefon'] = update.message.text
-    if update.message.text == "⬅️ Orqaga":
-    return await narx_qabul(update, context)
+    context.
     user_data['user_id'] = update.message.from_user.id
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # Saqlash
     cursor.execute('''
         INSERT INTO yuk_elonlar 
-        (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, premium)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         context.user_data['user_id'],
         context.user_data['viloyat'],
@@ -114,19 +125,44 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['mashina'],
         context.user_data['narx'],
         context.user_data['telefon'],
-        context.user_data['sanasi']
+        context.user_data['sanasi'],
+        0  # Premium emas
     ))
     conn.commit()
 
     await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
-    await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=main_menu_keyboard())
 
+    # Premium taklifi
+    await update.message.reply_text(
+        "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\n"
+        "Premium e’loningiz doimo yuqorida ko‘rsatiladi.",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("💎 Premium qilish (10,000 so‘m)", callback_data=f"premium_{context.user_data['user_id']}_{context.user_data['sanasi']}")]
+        ])
+    )
+
+    # 24 soatlik kuzatuv
     asyncio.create_task(elon_muddat_tugashi(context.user_data['user_id'], context.user_data['sanasi'], context))
 
+    await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=main_menu_keyboard())
     return -1
 
 
-# 24 soat va 8 soat muddatni kuzatish
+### PREMIUM E'LON CALLBACK HANDLER
+async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data.split('_')
+    user_id, sanasi = data[1], data[2]
+
+    cursor.execute('UPDATE yuk_elonlar SET premium=1 WHERE user_id=? AND sanasi=?', (user_id, sanasi))
+    conn.commit()
+
+    await query.edit_message_text("✅ E’loningiz endi Premium holatga o‘tkazildi. Rahmat!")
+
+
+### 24 SOATLIK E'LON MUDDATI
 async def elon_muddat_tugashi(user_id, sanasi, context):
     await asyncio.sleep(24 * 60 * 60)  # 24 soat kutish
 
@@ -150,3 +186,9 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
             cursor.execute("DELETE FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
             conn.commit()
             await context.bot.send_message(chat_id=user_id, text="❌ E'loningiz o‘chirildi.")
+
+
+# CALLBACK HANDLERS UCHUN FUNKSIYALARNI YANA YAZISH KERAK:
+# - uzaytirish
+# - o‘chirish
+# - premium qilish
