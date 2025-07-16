@@ -1,0 +1,1 @@
+# main.py - Bot ishga tushirish kodi
