@@ -1,6 +1,6 @@
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 
-  File "/app/main.py", line 14, in <module>
+  from database import cursor, conn
 
     from handlers import (
 
