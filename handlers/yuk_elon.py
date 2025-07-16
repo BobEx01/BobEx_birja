@@ -96,7 +96,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data['telefon'] = update.message.text
     if update.message.text == "⬅️ Orqaga":
-    return await narx_qabul(update, context) context.user_data['telefon'] = update.message.text
+    return await narx_qabul(update, context)
     user_data['user_id'] = update.message.from_user.id
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
