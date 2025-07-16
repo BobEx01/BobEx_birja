@@ -1,5 +1,3 @@
-# handlers/hisobim.py
-
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, ConversationHandler
 from database import cursor, conn
@@ -7,14 +5,10 @@ from handlers.start import asosiy_menu
 
 ADMIN_ID = 8080091052
 
-# Conversation bosqichlari
 TOLOV_MIqdori, TOLOV_CHEK = range(2)
 
-# Hisobni ko‘rish
 async def hisobim_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
-
-    # Balansni bazadan olish
     cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
     result = cursor.fetchone()
     balans = result[0] if result else 0
@@ -24,10 +18,8 @@ async def hisobim_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True))
 
 
-# Hisobni to‘ldirish jarayonini boshlash
 async def hisobni_tolidirish_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
-
     text = (
         f"💳 Hisobni to‘ldirish bo‘limi:\n\n"
         "To'lov tizimi: 🔷 Humo[Card]\n"
@@ -45,20 +37,17 @@ async def hisobni_tolidirish_start(update: Update, context: ContextTypes.DEFAULT
         "⚠️ To‘lovingiz 15-500 daqiqa ichida ko‘rib chiqiladi.\n"
         "Bot orqali kiritilgan pul qaytarilmaydi — faqat xizmat uchun."
     )
-
     keyboard = [["✅ To‘lov qildim"], ["⬅️ Orqaga"]]
     await update.message.reply_text(text, reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True))
     return TOLOV_MIqdori
 
 
-# To‘lov miqdorini qabul qilish
 async def tolov_miqdori_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['tolov_miqdori'] = update.message.text
     await update.message.reply_text("📸 Endi to‘lov chek rasmini yuboring:")
     return TOLOV_CHEK
 
 
-# To‘lov chek rasmini qabul qilish
 async def tolov_chek_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     miqdor = context.user_data.get('tolov_miqdori')
@@ -67,7 +56,6 @@ async def tolov_chek_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if photo:
         await update.message.reply_text("✅ To‘lovingiz qabul qilindi. Admin tekshiradi.", reply_markup=asosiy_menu())
 
-        # Admin uchun habar
         text = (
             f"💵 Yangi to‘lov!\n\n"
             f"👤 User ID: {user_id}\n"
@@ -85,7 +73,6 @@ async def tolov_chek_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# Admin tomonidan to‘lovni tasdiqlash
 async def admin_tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = update.message.text.split('_')
     if len(args) != 3:
@@ -96,7 +83,6 @@ async def admin_tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = int(user_id)
     miqdor = int(miqdor)
 
-    # Balansni yangilash
     cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
     result = cursor.fetchone()
     if result:
@@ -110,7 +96,6 @@ async def admin_tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
 
 
-# Orqaga qaytish
 async def ortga_qaytish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🏠 Bosh menyu:", reply_markup=asosiy_menu())
     return ConversationHandler.END
