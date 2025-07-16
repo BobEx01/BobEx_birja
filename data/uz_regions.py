@@ -1,0 +1,1 @@
+# uz_regions.py - Viloyatlar va tumanlar ro'yxati
