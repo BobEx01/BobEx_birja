@@ -23,7 +23,7 @@ from handlers import (
     raqam_olish,
     admin_xabar
 )
-
+app.add_handler(MessageHandler(filters.TEXT & filters.Regex("^💳 Hisobim$"), hisobim.hisobim_handler))
 # Logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
