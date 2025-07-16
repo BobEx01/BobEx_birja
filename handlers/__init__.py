@@ -1,11 +1,1 @@
-from . import start
-from . import hisobim
-from . import hisob_tolidirish
-from . import paketlar
-from . import premium_vip
-from . import yuk_elon
-from . import yuk_korish
-from . import shofyor_elon
-from . import shofyor_korish
-from . import raqam_olish
-from . import admin_xabar
+
