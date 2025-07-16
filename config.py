@@ -1,1 +1,15 @@
-# config.py - Token va admin ID
+# config.py
+
+TOKEN = '7653469544:AAFH4xoRxu8-_nWy0CR1gXA1Nkv1txt3gqc'
+ADMIN_ID = 8080091052
+ADMIN_USERNAME = '@bobex_uz'
+
+UZCARD_NUMBER = '5614 6822 1820 6250'
+CARD_OWNER = 'Muhammadbobur.A'
+MIN_PAYMENT = 10000
+MAX_PAYMENT = 10000000
+
+RAQAM_NARX = 28000
+VIP_NARX = 1000000
+PREMIUM_ELON_NARX = 10000
+PAKET_10_NARX = 186000  # 10 ta raqam olish paketi (33% chegirma)
