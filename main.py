@@ -23,7 +23,7 @@ from handlers import (
     raqam_olish,
     admin_xabar
 )
-app.add_handler(MessageHandler(filters.TEXT & filters.Regex("^💳 Hisobim$"), hisobim.hisobim_handler))
+
 # Logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -34,7 +34,7 @@ app.add_handler(CommandHandler('start', start.boshlash))
 app.add_handler(CommandHandler('boshlash', start.boshlash))
 
 # --- HISOBIM, TO‘LDIRISH, ADMIN TASTIQLASH ---
-app.add_handler(MessageHandler(filters.Text("💳 Hisobim"), hisobim.hisobim_handler))
+app.add_handler(MessageHandler(filters.TEXT & filters.Regex("^💳 Hisobim$"), hisobim.hisobim_handler))
 
 app.add_handler(ConversationHandler(
     entry_points=[MessageHandler(filters.Text("Hisobni to‘ldirish"), hisobim.hisobni_tolidirish_start)],
