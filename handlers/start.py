@@ -1,34 +1,28 @@
 # handlers/start.py
 
-from telegram import ReplyKeyboardMarkup
-from config import ADMIN_USERNAME
+from telegram import Update, ReplyKeyboardMarkup
+from telegram.ext import ContextTypes
 
-def main_menu():
+async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         ["🚛 Yuk uchun e'lon berish"],
         ["🚚 Shofyor e'lon berish"],
         ["📦 Yuk e'lonlarini ko‘rish"],
         ["🚚 Shofyor e'lonlarini ko‘rish"],
-        ["💳 Hisobim", "🎟 Paketlar"],
-        ["❓ Yordam"]
+        ["💳 Hisobim"],
+        ["🎁 Paketlar"]
     ]
-    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-async def start_handler(update, context):
-    await update.message.reply_text(
-        "Assalomu alaykum!\n\n"
-        "Quyidagi menyudan birini tanlang:",
-        reply_markup=main_menu()
-    )
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-async def help_handler(update, context):
     await update.message.reply_text(
-        "Botdan foydalanish bo‘yicha yordam:\n\n"
-        "👉 Yuk uchun e'lon berish: Yukingizni joylang\n"
-        "👉 Shofyor e'lon berish: Transportchi sifatida e'lon bering\n"
-        "👉 Yuk va Shofyor e'lonlarini ko‘rish: E'lonlarni ko‘rib, raqam olish\n"
-        "👉 Hisobim: Balans, VIP, Paket\n"
-        "👉 Paketlar: Maxsus chegirmali paketlar\n"
-        "Yordam uchun: " + ADMIN_USERNAME,
-        reply_markup=main_menu()
+        "👋 Assalomu alaykum, BobEx botiga xush kelibsiz!\n\n"
+        "Quyidagi menyulardan birini tanlang:\n\n"
+        "🚛 Yuk uchun e'lon berish\n"
+        "🚚 Shofyor e'lon berish\n"
+        "📦 Yuk e'lonlarini ko‘rish\n"
+        "🚚 Shofyor e'lonlarini ko‘rish\n"
+        "💳 Hisobim — balans va hisob to‘ldirish\n"
+        "🎁 Paketlar — VIP tarif va bonus paketlar",
+        reply_markup=reply_markup
     )
