@@ -12,7 +12,7 @@ from config import TOKEN
 from handlers import (
     start, 
     hisobim, 
-    hisob_tolidirish,
+    hisob_tolidirish, 
     paketlar, 
     premium_vip, 
     yuk_elon, 
@@ -28,7 +28,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 app = Application.builder().token(TOKEN).build()
 
-# --- START ---
+# --- START komandasi ---
 app.add_handler(CommandHandler('start', start.boshlash))
 app.add_handler(CommandHandler('boshlash', start.boshlash))
 
@@ -47,9 +47,11 @@ app.add_handler(ConversationHandler(
 
 app.add_handler(MessageHandler(filters.Regex(r'^/tasdiqla_'), hisob_tolidirish.admin_tasdiqlash))
 
-# --- PAKETLAR, PREMIUM ---
+# --- PAKETLAR ---
 app.add_handler(MessageHandler(filters.Regex("^🎁 Paketlar$"), paketlar.paketlar_handler))
 app.add_handler(CommandHandler('paket_ol', paketlar.paket_ol))
+
+# --- PREMIUM/VIP ---
 app.add_handler(CommandHandler('premium', premium_vip.premium_elon))
 app.add_handler(CommandHandler('vip', premium_vip.vip_aktiv))
 
@@ -90,11 +92,8 @@ app.add_handler(MessageHandler(filters.Regex("^📦 Yuk e'lonlarini ko‘rish$")
 app.add_handler(MessageHandler(filters.Regex("^🚚 Shofyor e'lonlarini ko‘rish$"), shofyor_korish.shofyor_korish))
 
 # --- RAQAM OLISH CALLBACK ---
-app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
-
-# --- ADMIN XABAR ---
-app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))
-
-# --- START LOG ---print("🤖 BobEx Bot to‘liq ishga tushdi...")
+app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))# --- ADMIN XABAR ---
+app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))# --- START LOG ---
+print("🤖 BobEx Bot to‘liq ishga tushdi...")
 
 app.run_polling()
