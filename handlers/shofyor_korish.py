@@ -1,0 +1,1 @@
+# shofyor_korish.py - Shofyor e'lonlarini ko'rish

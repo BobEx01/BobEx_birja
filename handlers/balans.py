@@ -1,0 +1,1 @@
+# balans.py - Balans va hisob to'ldirish

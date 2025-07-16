@@ -1,0 +1,1 @@
+# yuk_korish.py - Yuk e'lonlarini ko'rish

@@ -1,0 +1,1 @@
+# yuk_elon.py - Yuk e'lon berish

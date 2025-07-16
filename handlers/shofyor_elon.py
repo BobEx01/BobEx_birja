@@ -1,0 +1,1 @@
+# shofyor_elon.py - Shofyor e'lon berish
