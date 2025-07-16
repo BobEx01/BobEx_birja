@@ -19,13 +19,13 @@ async def hisobim_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True))
 
 
-# HISOB TO‘LDIRISHNI BOSHLASH
+# HISOB TO‘LDIRISH BOSHLASH
 async def hisobni_tolidirish_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     text = (
         f"💳 Hisobni to‘ldirish uchun:\n\n"
-        "To‘lov tizimi: 🔷 Humo Card\n"
-        "Hamyon: 5614 6822 1820 6250\n"
+        "🔹 Humo karta:\n5614 6822 1820 6250\n\n"
+        "🔹 Uzcard karta:\n8600 1234 5678 9012\n\n"
         f"Foydalanuvchi ID: {user_id}\n\n"
         "🔹 Minimal: 10,000 so'm\n"
         "🔹 Maksimal: 10,000,000 so'm\n\n"
