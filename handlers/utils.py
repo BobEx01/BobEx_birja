@@ -1,6 +1,18 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
 
+# Asosiy menyu funksiyasi
+def asosiy_menu():
+    keyboard = [
+        ["🚛 Yuk uchun e'lon berish"],
+        ["🚚 Shofyor e'lon berish"],
+        ["📦 Yuk e'lonlarini ko‘rish"],
+        ["🚚 Shofyor e'lonlarini ko‘rish"],
+        ["💳 Hisobim"],
+        ["🎁 Paketlar"]
+    ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
 # /start komandasi uchun funksiya
 async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
