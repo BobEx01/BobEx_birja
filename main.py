@@ -23,7 +23,6 @@ from handlers import (
     admin_xabar
 )
 
-# Logging konfiguratsiyasi
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 app = Application.builder().token(TOKEN).build()
@@ -32,8 +31,8 @@ app = Application.builder().token(TOKEN).build()
 app.add_handler(CommandHandler('start', start.boshlash))
 app.add_handler(CommandHandler('boshlash', start.boshlash))
 
-# --- HISOBIM ---
-app.add_handler(MessageHandler(filters.Regex("^💳 Hisobim$"), hisobim.hisobim_handler))
+# --- MENING HISOBIM ---
+app.add_handler(MessageHandler(filters.Regex("^📊 Mening hisobim$"), hisobim.hisobim_handler))
 
 # --- HISOBNI TO‘LDIRISH ---
 hisob_tolidirish_conv = ConversationHandler(
