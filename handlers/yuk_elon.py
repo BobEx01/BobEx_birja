@@ -1,6 +1,7 @@
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes
 from database import cursor, conn
+from handlers.start import start
 import datetime
 
 def viloyatlar_keyboard():
@@ -13,12 +14,6 @@ def viloyatlar_keyboard():
 
 def back_button():
     return ReplyKeyboardMarkup([["⬅️ Orqaga"]], resize_keyboard=True)
-
-def main_menu_keyboard():
-    return ReplyKeyboardMarkup([
-        ["➕ Yuk joylash", "🚚 Yuklarni ko‘rish"],
-        ["ℹ️ Ma’lumot", "⚙️ Sozlamalar"]
-    ], resize_keyboard=True)
 
 async def yuk_elon_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -97,11 +92,12 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     cursor.execute('''
-        INSERT INTO yuk_elonlar
+        INSERT INTO yuk_elonlar 
         (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
-        context.user_data['user_id'],
+        context.
+    user_data['user_id'],
         context.user_data['viloyat'],
         context.user_data['tuman'],
         context.user_data['qayerdan'],
@@ -119,9 +115,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=ReplyKeyboardRemove()
     )
 
-    await update.message.reply_text(
-        "🏠 Bosh menyuga qaytdingiz:",
-        reply_markup=main_menu_keyboard()
-    )
+    # Bosh menyuga qaytarish
+    await start(update, context)
 
     return -1  # Conversation tugaydi
