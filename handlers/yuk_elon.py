@@ -1,100 +1,122 @@
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-from telegram.ext import ContextTypes
-from database import cursor, conn
-import datetime
+Traceback (most recent call last):
 
-user_data = {}
+  File "/app/main.py", line 14, in <module>
 
-def viloyatlar_keyboard():
-    viloyatlar = ["Toshkent", "Andijon", "Farg'ona", "Namangan",
-                  "Samarqand", "Buxoro", "Navoiy", "Qashqadaryo",
-                  "Surxondaryo", "Jizzax", "Sirdaryo", "Xorazm", "Qoraqalpog'iston"]
-    keyboard = [[viloyat] for viloyat in viloyatlar]
-    keyboard.append(["⬅️ Orqaga"])
-    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    from handlers import (
 
-def back_button():
-    return ReplyKeyboardMarkup([["⬅️ Orqaga"]], resize_keyboard=True)
+  File "/app/handlers/yuk_elon.py", line 99
 
-async def yuk_elon_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Viloyatni tanlang:",
-        reply_markup=viloyatlar_keyboard()
-    )
-    return "viloyat"
-
-async def viloyat_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.text == "⬅️ Orqaga":
-        return await yuk_elon_start(update, context)
-    
-    user_data['viloyat'] = update.message.text
-    await update.message.reply_text("Tumaningizni kiriting:", reply_markup=back_button())
-    return "tuman"
-
-async def tuman_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.text == "⬅️ Orqaga":
-        return await viloyat_qabul(update, context)
-
-    user_data['tuman'] = update.message.text
-    await update.message.reply_text("Yuk qayerdan jo'natiladi?", reply_markup=back_button())
-    return "qayerdan"
-
-async def qayerdan_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.text == "⬅️ Orqaga":
-        return await tuman_qabul(update, context)
-
-    user_data['qayerdan'] = update.message.text
-    await update.message.reply_text("Yuk qayerga boradi?", reply_markup=back_button())
-    return "qayerga"
-
-async def qayerga_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.text == "⬅️ Orqaga":
-        return await qayerdan_qabul(update, context)
-
-    user_data['qayerga'] = update.message.text
-    await update.message.reply_text("Yuk og‘irligini kiriting (kg yoki tonna):", reply_markup=back_button())
-    return "ogirlik"
-
-async def ogirlik_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.text == "⬅️ Orqaga":
-        return await qayerga_qabul(update, context)
-
-    user_data['ogirlik'] = update.message.text
-    await update.message.reply_text("Qanday mashina kerak?", reply_markup=back_button())
-    return "mashina"
-
-async def mashina_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.text == "⬅️ Orqaga":
-        return await ogirlik_qabul(update, context)
-
-    user_data['mashina'] = update.message.text
-    await update.message.reply_text("Shofyor uchun to‘lov miqdorini kiriting (so‘m):", reply_markup=back_button())
-    return "narx"
-
-async def narx_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.text == "⬅️ Orqaga":
-        return await mashina_qabul(update, context)
-
-    try:
-        user_data['narx'] = int(update.message.text)
-    except ValueError:
-        await update.message.reply_text("Iltimos, to‘lovni faqat raqam bilan kiriting!")
-        return "narx"
-
-    await update.message.reply_text("Telefon raqamingizni yozing:", reply_markup=back_button())
-    return "telefon"
-
-async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.text == "⬅️ Orqaga":
-        return await narx_qabul(update, context)
-
-    user_data['telefon'] = update.message.text
-    user_data['user_id'] = update.message.from_user.id
-    user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    cursor.execute('''
-        INSERT INTO yuk_elonlar 
-        (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
-        user_data['user_id'], user_data['viloyat'], user_data['tuman'],
+
+         ^
+
+SyntaxError: '(' was never closed
+
+Traceback (most recent call last):
+
+  File "/app/main.py", line 14, in <module>
+
+    from handlers import (
+
+  File "/app/handlers/yuk_elon.py", line 99
+
+    ''', (
+
+         ^
+
+SyntaxError: '(' was never closed
+
+Traceback (most recent call last):
+
+  File "/app/main.py", line 14, in <module>
+
+    from handlers import (
+
+  File "/app/handlers/yuk_elon.py", line 99
+
+    ''', (
+
+         ^
+
+SyntaxError: '(' was never closed
+
+Traceback (most recent call last):
+
+  File "/app/main.py", line 14, in <module>
+
+    from handlers import (
+
+  File "/app/handlers/yuk_elon.py", line 99
+
+    ''', (
+
+         ^
+
+SyntaxError: '(' was never closed
+
+Traceback (most recent call last):
+
+  File "/app/main.py", line 14, in <module>
+
+    from handlers import (
+
+  File "/app/handlers/yuk_elon.py", line 99
+
+    ''', (
+
+         ^
+
+SyntaxError: '(' was never closed
+
+Traceback (most recent call last):
+
+  File "/app/main.py", line 14, in <module>
+
+    from handlers import (
+
+  File "/app/handlers/yuk_elon.py", line 99
+
+    ''', (
+
+         ^
+
+SyntaxError: '(' was never closed
+
+Traceback (most recent call last):
+
+  File "/app/main.py", line 14, in <module>
+
+    from handlers import (
+
+  File "/app/handlers/yuk_elon.py", line 99
+
+    ''', (
+
+         ^
+
+SyntaxError: '(' was never closed
+
+Traceback (most recent call last):
+
+  File "/app/main.py", line 14, in <module>
+
+    from handlers import (
+
+  File "/app/handlers/yuk_elon.py", line 99
+
+    ''', (
+
+         ^
+
+SyntaxError: '(' was never closed
+user_data['qayerdan'], user_data['qayerga'], user_data['ogirlik'],
+        user_data['mashina'], user_data['narx'], user_data['telefon'],
+        user_data['sanasi']
+    ))
+    conn.commit()
+
+    await update.message.reply_text(
+        "✅ Yuk e’loningiz muvaffaqiyatli joylandi!",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return -1  # Conversation tugaydi
