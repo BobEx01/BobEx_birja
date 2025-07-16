@@ -1,0 +1,1 @@
+# database.py - SQLite DB funksiyalar
