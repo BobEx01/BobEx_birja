@@ -113,4 +113,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "✅ Yuk e’loningiz muvaffaqiyatli joylandi!",
         reply_markup=ReplyKeyboardRemove()
     )
+    await update.message.reply_text(
+        "🏠 Bosh menyu:",
+        reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     return -1  # Conversation tugaydi
