@@ -8,7 +8,7 @@ def asosiy_menu():
         ["🚚 Shofyor e'lon berish"],
         ["📦 Yuk e'lonlarini ko‘rish"],
         ["🚚 Shofyor e'lonlarini ko‘rish"],
-        ["💳 Hisobim", "Hisobni to‘ldirish"],
+        ["📊 Mening hisobim", "Hisobni to‘ldirish"],
         ["🎁 Paketlar"]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -22,7 +22,7 @@ async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🚚 Shofyor e'lon berish\n"
         "📦 Yuk e'lonlarini ko‘rish\n"
         "🚚 Shofyor e'lonlarini ko‘rish\n"
-        "💳 Hisobim — balans va hisob to‘ldirish\n"
+        "📊 Mening hisobim — balans va hisob to‘ldirish\n"
         "Hisobni to‘ldirish — balansni to‘ldiring\n"
         "🎁 Paketlar — VIP tarif va bonus paketlar",
         reply_markup=asosiy_menu()
