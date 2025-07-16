@@ -3,16 +3,7 @@ from telegram.ext import ContextTypes
 import datetime
 import asyncio
 from database import cursor, conn
-
-
-def main_menu_keyboard():
-    keyboard = [
-        ["➕ Yuk joylash", "🚚 Yuklarni ko‘rish"],
-        ["➕ Shofyor e'lon joylash", "🚗 Shofyorlarni ko‘rish"],
-        ["🔎 Shofyor kerak", "🔍 Yuk kerak"],
-        ["📞 Aloqa", "ℹ️ Ma’lumot"]
-    ]
-    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+from handlers.start import asosiy_menu
 
 
 def viloyatlar_keyboard():
@@ -109,10 +100,8 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['user_id'] = update.message.from_user.id
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Saqlash
     cursor.execute('''
-        INSERT INTO yuk_elonlar 
-        (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, premium)
+        INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, premium)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         context.user_data['user_id'],
@@ -125,13 +114,13 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['narx'],
         context.user_data['telefon'],
         context.user_data['sanasi'],
-        0  # Premium emas
+        0  # premium emas
     ))
     conn.commit()
 
     await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
-    # Premium taklifi
+    # Premium taklif
     await update.message.reply_text(
         "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\n"
         "Premium e’loningiz doimo yuqorida ko‘rsatiladi.",
@@ -140,14 +129,13 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
     )
 
-    # 24 soatlik kuzatuv
     asyncio.create_task(elon_muddat_tugashi(context.user_data['user_id'], context.user_data['sanasi'], context))
 
-    await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=main_menu_keyboard())
+    await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
 
 
-### PREMIUM E'LON CALLBACK HANDLER
+### PREMIUM E'LON CALLBACK
 async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -161,9 +149,9 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     await query.edit_message_text("✅ E’loningiz endi Premium holatga o‘tkazildi. Rahmat!")
 
 
-### 24 SOATLIK E'LON MUDDATI
+### 24 SOATLIK MUDDAT VA O‘CHIRISH
 async def elon_muddat_tugashi(user_id, sanasi, context):
-    await asyncio.sleep(24 * 60 * 60)  # 24 soat kutish
+    await asyncio.sleep(24 * 60 * 60)  # 24 soat
 
     cursor.execute("SELECT * FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
     elon = cursor.fetchone()
@@ -178,16 +166,10 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
             reply_markup=keyboard
         )
 
-        await asyncio.sleep(8 * 60 * 60)  # 8 soat kutish
+        await asyncio.sleep(8 * 60 * 60)  # 8 soat
         cursor.execute("SELECT * FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
         check = cursor.fetchone()
         if check:
             cursor.execute("DELETE FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
             conn.commit()
             await context.bot.send_message(chat_id=user_id, text="❌ E'loningiz o‘chirildi.")
-
-
-# CALLBACK HANDLERS UCHUN FUNKSIYALARNI YANA YAZISH KERAK:
-# - uzaytirish
-# - o‘chirish
-# - premium qilish
