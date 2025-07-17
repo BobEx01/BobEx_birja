@@ -1,5 +1,3 @@
-# handlers/shofyor_korish.py
-
 from database import cursor
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -17,9 +15,7 @@ async def shofyor_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = []
     for viloyat, count in viloyatlar:
-        keyboard.append([
-            InlineKeyboardButton(f"{viloyat} ({count} ta)", callback_data=f"shof_vil_{viloyat}")
-        ])
+        keyboard.append([InlineKeyboardButton(f"{viloyat} ({count} ta)", callback_data=f"shof_vil_{viloyat}")])
 
     keyboard.append([
         InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")
@@ -35,7 +31,7 @@ async def shofyor_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    viloyat = query.data.split('_')[2]
+    viloyat = query.data.split('_', 2)[2]
     cursor.execute("SELECT tuman, COUNT(*) FROM shofyor_elonlar WHERE viloyat = ? GROUP BY tuman", (viloyat,))
     tumanlar = cursor.fetchall()
 
@@ -45,9 +41,7 @@ async def shofyor_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = []
     for tuman, count in tumanlar:
-        keyboard.append([
-            InlineKeyboardButton(f"{tuman} ({count} ta)", callback_data=f"shof_tum_{viloyat}_{tuman}")
-        ])
+        keyboard.append([InlineKeyboardButton(f"{tuman} ({count} ta)", callback_data=f"shof_tum_{viloyat}_{tuman}")])
 
     keyboard.append([
         InlineKeyboardButton("⬅️ Orqaga", callback_data="orqaga_viloyatlar_shofyor"),
@@ -64,7 +58,7 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    _, _, viloyat, tuman = query.data.split('_')
+    _, _, viloyat, tuman = query.data.split('_', 3)
 
     cursor.execute(
         "SELECT id, mashina, sigim, narx FROM shofyor_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
@@ -80,9 +74,9 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elon_id, mashina, sigim, narx = elon
 
         text = (
-            f"🏷 Shofyor E’lon ID: {elon_id}\n"
+            f"🏷 E’lon ID: {elon_id}\n"
             f"📍 Manzil: {viloyat}, {tuman}\n"
-            f"🚚 Mashina turi: {mashina}\n"
+            f"🚚 Mashina: {mashina}\n"
             f"⚖️ Sig‘im: {sigim}\n"
             f"💰 Narx: {narx} so‘m\n"
         )
@@ -93,29 +87,29 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await query.message.reply_text(text, reply_markup=keyboard)
 
-    # Navigatsion tugmalar
-    keyboard_nav = InlineKeyboardMarkup([
+    nav_keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("⬅️ Orqaga", callback_data=f"orqaga_tumanlar_shofyor_{viloyat}")],
         [InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")]
     ])
 
-    await query.message.reply_text("Tanlang:", reply_markup=keyboard_nav)
+    await query.message.reply_text("Tanlang:", reply_markup=nav_keyboard)
 
 
-# --- ORQAGA VILOYATLARGA ---
 async def orqaga_viloyatlar_shofyor(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await shofyor_korish(update, context)
+    query = update.callback_query
+    await query.answer()
+    await shofyor_korish(query, context)
 
 
-# --- ORQAGA TUMANLARGA ---
 async def orqaga_tumanlar_shofyor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    viloyat = query.data.split('_')[-1]
+
+    parts = query.data.split('_')
+    viloyat = parts[-1]
     await shofyor_tumanlar(query, context)
 
 
-# --- ASOSIY MENYU HANDLER ---
 async def asosiy_menyu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
