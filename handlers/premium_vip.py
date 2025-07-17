@@ -3,6 +3,7 @@ from config import PREMIUM_ELON_NARX, VIP_NARX, ADMIN_ID
 from handlers.start import asosiy_menu
 import datetime
 
+
 async def premium_elon(update, context):
     user_id = update.message.from_user.id
 
@@ -29,11 +30,19 @@ async def premium_elon(update, context):
         text=f"📦 User {user_id} premium e’lon sotib oldi."
     )
 
+
 async def premium_elon_callback(update, context):
     query = update.callback_query
     await query.answer()
 
-    user_id = query.from_user.id
+    data = query.data.split('_')
+    if len(data) < 4:
+        await query.edit_message_text("❌ Ma'lumot noto‘g‘ri keldi.")
+        return
+
+    _, _, user_id, sanasi = data
+    user_id = int(user_id)
+
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
     result = cursor.fetchone()
 
@@ -44,8 +53,12 @@ async def premium_elon_callback(update, context):
         )
         return
 
+    # Balansdan pul yechish
     cursor.execute('UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ? WHERE user_id = ?',
                    (PREMIUM_ELON_NARX, PREMIUM_ELON_NARX, user_id))
+    
+    # E'lonni Premium qilish
+    cursor.execute('UPDATE yuk_elonlar SET premium = 1 WHERE user_id = ? AND sanasi = ?', (user_id, sanasi))
     conn.commit()
 
     await query.edit_message_text("✅ E’lon Premium qilindi! Endi u ro‘yxatda yuqorida ko‘rsatiladi.")
@@ -54,6 +67,7 @@ async def premium_elon_callback(update, context):
         chat_id=ADMIN_ID,
         text=f"📦 User {user_id} premium e’lon CALLBACK orqali sotib oldi."
     )
+
 
 async def vip_aktiv(update, context):
     user_id = update.message.from_user.id
@@ -70,7 +84,7 @@ async def vip_aktiv(update, context):
     vip_muddati = datetime.datetime.now() + datetime.timedelta(days=30)
     cursor.execute("""
         UPDATE foydalanuvchilar 
-        SET balans = balans - ?, sarflangan = sarflangan + ?, vip=1, vip_muddati = ?
+        SET balans = balans - ?, sarflangan = sarflangan + ?, vip = 1, vip_muddati = ?
         WHERE user_id = ?
     """, (VIP_NARX, VIP_NARX, vip_muddati.strftime('%Y-%m-%d'), user_id))
     conn.commit()
