@@ -10,8 +10,9 @@ CREATE TABLE IF NOT EXISTS foydalanuvchilar (
     username TEXT,
     balans INTEGER DEFAULT 0,
     bonus_berildi BOOLEAN DEFAULT 0,
-    paketlar TEXT DEFAULT 'Yo‘q',
-    toldirilgan INTEGER DEFAULT 0
+    paket_soni INTEGER DEFAULT 0,
+    vip_muddati TEXT,
+    sarflangan INTEGER DEFAULT 0
 )
 ''')
 
@@ -60,7 +61,7 @@ CREATE TABLE IF NOT EXISTS raqamlar_olingan (
 )
 ''')
 
-# --- Tolov loglari ---
+# --- To‘lov loglari ---
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS tolov_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
