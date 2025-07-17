@@ -99,6 +99,7 @@ async def admin_tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
     except Exception as e:
         await update.message.reply_text(f"❌ Xatolik: {e}")
-        async def ortga_qaytish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def ortga_qaytish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🏠 Bosh menyu:", reply_markup=asosiy_menu())
     return ConversationHandler.END
