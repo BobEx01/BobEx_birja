@@ -28,7 +28,6 @@ async def paket_ol(update, context):
         )
         return
 
-    # Balansdan yechish va paket berish
     cursor.execute("""
         UPDATE foydalanuvchilar 
         SET balans = balans - ?, sarflangan = sarflangan + ?, paket_soni = paket_soni + 10
@@ -41,7 +40,6 @@ async def paket_ol(update, context):
         "Endi balansdan yechmasdan 10 ta raqam olishingiz mumkin."
     )
 
-    # Admin xabari
     await context.bot.send_message(
         chat_id=ADMIN_ID,
         text=f"📦 User {user_id} 10 ta raqam olish paketini sotib oldi."
@@ -65,30 +63,30 @@ async def vip_paket_ol(update, context):
         )
         return
 
-    vip_muddati = datetime.now() + timedelta(days=30)
+    vip_oxirgi = datetime.now() + timedelta(days=30)
     cursor.execute("""
         UPDATE foydalanuvchilar 
-        SET balans = balans - ?, vip_muddati = ?
+        SET balans = balans - ?, sarflangan = sarflangan + ?, vip_oxirgi = ?
         WHERE user_id = ?
-    """, (VIP_NARX, vip_muddati.strftime('%Y-%m-%d'), user_id))
+    """, (VIP_NARX, VIP_NARX, vip_oxirgi.strftime('%Y-%m-%d'), user_id))
     conn.commit()
 
     await update.message.reply_text(
         f"🎉 Tabriklaymiz! VIP paket faollashtirildi.\n"
-        f"📅 Amal qilish muddati: {vip_muddati.strftime('%Y-%m-%d')}\n",
+        f"📅 Amal qilish muddati: {vip_oxirgi.strftime('%Y-%m-%d')}\n",
         reply_markup=asosiy_menu()
     )
 
     await context.bot.send_message(
         chat_id=ADMIN_ID,
-        text=f"👑 User {user_id} VIP paket sotib oldi. Muddati: {vip_muddati.strftime('%Y-%m-%d')}."
+        text=f"👑 User {user_id} VIP paket sotib oldi. Muddati: {vip_oxirgi.strftime('%Y-%m-%d')}."
     )
 
 
 async def paket_stat(update, context):
     user_id = update.message.from_user.id
     cursor.execute("""
-        SELECT balans, paket_soni, vip_muddati 
+        SELECT balans, paket_soni, vip_oxirgi 
         FROM foydalanuvchilar 
         WHERE user_id = ?
     """, (user_id,))
@@ -98,13 +96,13 @@ async def paket_stat(update, context):
         await update.message.reply_text("❌ Statistika topilmadi. Avval ro‘yxatdan o‘ting /start")
         return
 
-    balans, paket_soni, vip_muddati = result
+    balans, paket_soni, vip_oxirgi = result
     vip_status = "❌ Yo‘q"
-    if vip_muddati:
+    if vip_oxirgi:
         today = datetime.now().date()
-        vip_date = datetime.strptime(vip_muddati, '%Y-%m-%d').date()
+        vip_date = datetime.strptime(vip_oxirgi, '%Y-%m-%d').date()
         if vip_date >= today:
-            vip_status = f"✅ {vip_muddati} gacha faollikda"
+            vip_status = f"✅ {vip_oxirgi} gacha faollikda"
 
     text = (
         f"📊 <b>Statistika:</b>\n\n"
