@@ -44,7 +44,6 @@ hisob_tolidirish_conv = ConversationHandler(
     fallbacks=[MessageHandler(filters.Regex("^⬅️ Orqaga$"), hisob_tolidirish.ortga_qaytish)]
 )
 app.add_handler(hisob_tolidirish_conv)
-
 app.add_handler(MessageHandler(filters.Regex(r'^/tasdiqla_'), hisob_tolidirish.admin_tasdiqlash))
 
 # --- PAKETLAR ---
