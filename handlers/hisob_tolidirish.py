@@ -27,6 +27,9 @@ async def hisobni_tolidirish_start(update: Update, context: ContextTypes.DEFAULT
 
 
 async def tolov_miqdori_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.text == "⬅️ Orqaga":
+        return await ortga_qaytish(update, context)
+
     try:
         miqdor = int(update.message.text)
         if miqdor < 10000:
@@ -42,6 +45,9 @@ async def tolov_miqdori_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def tolov_chek_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.text == "⬅️ Orqaga":
+        return await ortga_qaytish(update, context)
+
     user_id = update.message.from_user.id
     miqdor = context.user_data.get('tolov_miqdori')
     photo = update.message.photo[-1].file_id if update.message.photo else None
@@ -95,10 +101,10 @@ async def admin_tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(
                 f"✅ User {user_id} balansiga {miqdor} so‘m qo‘shildi. Yangi balans: {yangi_balans} so'm."
             )
-        else:
-            await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
+        else:await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
     except Exception as e:
         await update.message.reply_text(f"❌ Xatolik: {e}")
+
 
 async def ortga_qaytish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🏠 Bosh menyu:", reply_markup=asosiy_menu())
