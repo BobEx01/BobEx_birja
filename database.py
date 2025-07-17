@@ -3,7 +3,7 @@ import sqlite3
 conn = sqlite3.connect('bobex.db', check_same_thread=False)
 cursor = conn.cursor()
 
-# foydalanuvchilar jadvali
+# --- Foydalanuvchilar jadvali ---
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS foydalanuvchilar (
     user_id INTEGER PRIMARY KEY,
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS foydalanuvchilar (
 )
 ''')
 
-# Yuk elonlar
+# --- Yuk e'lonlar ---
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS yuk_elonlar (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS yuk_elonlar (
 )
 ''')
 
-# Shofyor elonlar
+# --- Shofyor e'lonlar ---
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS shofyor_elonlar (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS shofyor_elonlar (
 )
 ''')
 
-# Olingan raqamlar
+# --- Olingan raqamlar ---
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS raqamlar_olingan (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS raqamlar_olingan (
 )
 ''')
 
-# Tolov loglari
+# --- Tolov loglari ---
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS tolov_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
