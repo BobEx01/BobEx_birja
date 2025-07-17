@@ -89,10 +89,14 @@ app.add_handler(shofyor_elon_conv)
 
 # --- E'LON KO‘RISH ---
 app.add_handler(MessageHandler(filters.Regex("^📦 Yuk e'lonlarini ko‘rish$"), yuk_korish.yuk_korish))
-app.add_handler(CallbackQueryHandler(yuk_korish.viloyatlarni_korish, pattern='^viloyat_'))
-app.add_handler(CallbackQueryHandler(yuk_korish.tumanlarni_korish, pattern='^tuman_'))
-
 app.add_handler(MessageHandler(filters.Regex("^🚚 Shofyor e'lonlarini ko‘rish$"), shofyor_korish.shofyor_korish))
+
+# Yuk e'lonlari navigatsiyasi
+app.add_handler(CallbackQueryHandler(yuk_korish.tumanlar_korish, pattern='^viloyat_'))
+app.add_handler(CallbackQueryHandler(yuk_korish.elonlar_korish, pattern='^tuman_'))
+app.add_handler(CallbackQueryHandler(yuk_korish.orqaga_viloyatlar, pattern='^orqaga_viloyatlar$'))
+app.add_handler(CallbackQueryHandler(yuk_korish.orqaga_tumanlar, pattern='^orqaga_tumanlar_'))
+app.add_handler(CallbackQueryHandler(yuk_korish.asosiy_menyu_handler, pattern='^asosiy_menyu$'))
 
 # --- RAQAM OLISH CALLBACK ---
 app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
