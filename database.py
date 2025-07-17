@@ -11,9 +11,8 @@ CREATE TABLE IF NOT EXISTS foydalanuvchilar (
     balans INTEGER DEFAULT 0,
     bonus_berildi BOOLEAN DEFAULT 0,
     paket_soni INTEGER DEFAULT 0,
-    vip_muddati TEXT,
-    sarflangan INTEGER DEFAULT 0,
-    toldirilgan INTEGER DEFAULT 0
+    vip_oxirgi TEXT DEFAULT NULL,
+    sarflangan INTEGER DEFAULT 0
 )
 ''')
 
