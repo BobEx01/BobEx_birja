@@ -100,8 +100,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['user_id'] = update.message.from_user.id
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    cursor.execute('''
-        INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, premium)
+    cursor.execute('''INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, premium)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         context.user_data['user_id'],
@@ -114,13 +113,12 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['narx'],
         context.user_data['telefon'],
         context.user_data['sanasi'],
-        0  # premium emas
+        0
     ))
     conn.commit()
 
     await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
-    # Premium taklif
     await update.message.reply_text(
         "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\n"
         "Premium e’loningiz doimo yuqorida ko‘rsatiladi.",
@@ -135,7 +133,6 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return -1
 
 
-### PREMIUM E'LON CALLBACK
 async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -149,9 +146,8 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     await query.edit_message_text("✅ E’loningiz endi Premium holatga o‘tkazildi. Rahmat!")
 
 
-### 24 SOATLIK MUDDAT VA O‘CHIRISH
 async def elon_muddat_tugashi(user_id, sanasi, context):
-    await asyncio.sleep(24 * 60 * 60)  # 24 soat
+    await asyncio.sleep(24 * 60 * 60)
 
     cursor.execute("SELECT * FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
     elon = cursor.fetchone()
@@ -166,7 +162,7 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
             reply_markup=keyboard
         )
 
-        await asyncio.sleep(8 * 60 * 60)  # 8 soat
+        await asyncio.sleep(8 * 60 * 60)
         cursor.execute("SELECT * FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
         check = cursor.fetchone()
         if check:
