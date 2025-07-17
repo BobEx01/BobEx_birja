@@ -1,55 +1,61 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes
 from database import cursor, conn
-from config import PREMIUM_ELON_NARX, VIP_NARX, ADMIN_ID
-from handlers.start import asosiy_menu
-import datetime
+from config import PREMIUM_ELON_NARX, ADMIN_ID
 
 
-async def premium_elon(update, context):
-    user_id = update.message.from_user.id
-
-    cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
-    result = cursor.fetchone()
-
-    if not result:
-        await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
-        return
-
-    balans = result[0]
-    if balans < PREMIUM_ELON_NARX:
-        await update.message.reply_text(
-            f"❌ Balansingiz yetarli emas. Premium e’lon uchun {PREMIUM_ELON_NARX} so‘m kerak.\n"
-            "💳 Balansni to‘ldiring: /hisobim"
-        )
-        return
+# E'LONLARNI CHIQARISH FUNKSIYASI
+async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    _, viloyat, tuman = query.data.split('_')
 
     cursor.execute(
-        'UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ? WHERE user_id = ?',
-        (PREMIUM_ELON_NARX, PREMIUM_ELON_NARX, user_id)
+        "SELECT id, qayerdan, qayerga, ogirlik, mashina, narx, premium FROM yuk_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
+        (viloyat, tuman)
     )
-    conn.commit()
+    elonlar = cursor.fetchall()
 
-    await update.message.reply_text(
-        "✅ Premium e’lon muvaffaqiyatli faollashtirildi!\n"
-        "Endi e’loningiz ro‘yxatda yuqorida chiqadi."
-    )
+    if not elonlar:
+        await query.edit_message_text("Bu tumanda yuk e’lonlari topilmadi.")
+        return
 
-    await context.bot.send_message(
-        chat_id=ADMIN_ID,
-        text=f"📦 User {user_id} premium e’lon sotib oldi."
-    )
+    for elon in elonlar:
+        elon_id, qayerdan, qayerga, ogirlik, mashina, narx, premium = elon
+
+        text = (
+            f"🏷 Yuk E’lon ID: {elon_id}\n"
+            f"📍 Manzil: {viloyat}, {tuman}\n"
+            f"🚩 Qayerdan: {qayerdan}\n"
+            f"🏁 Qayerga: {qayerga}\n"
+            f"⚖️ Og‘irligi: {ogirlik}\n"
+            f"🚚 Mashina turi: {mashina}\n"
+            f"💰 Narx: {narx} so‘m\n"
+        )
+
+        if premium == 1:
+            text = "💎 PREMIUM E'LON 💎\n\n" + text
+
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💎 Premium qilish", callback_data=f"premium_elon_{elon_id}")],
+        ])
+
+        await query.message.reply_text(text, reply_markup=keyboard)
 
 
-async def premium_elon_callback(update, context):
+# PREMIUMGA AYLANTRISH CALLBACK FUNKSIYASI
+async def premium_elon_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     data = query.data.split('_')
-    if len(data) < 4:
+    if len(data) < 3:
         await query.edit_message_text("❌ Ma'lumot noto‘g‘ri keldi.")
         return
 
-    _, _, user_id, sanasi = data
-    user_id = int(user_id)
+    _, _, elon_id = data
+    elon_id = int(elon_id)
+    user_id = query.from_user.id
 
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
     result = cursor.fetchone()
@@ -74,8 +80,8 @@ async def premium_elon_callback(update, context):
 
     # E'lonni Premium qilish
     cursor.execute(
-        'UPDATE yuk_elonlar SET premium = 1 WHERE user_id = ? AND sanasi = ?',
-        (user_id, sanasi)
+        'UPDATE yuk_elonlar SET premium = 1 WHERE id = ?',
+        (elon_id,)
     )
 
     conn.commit()
@@ -84,43 +90,5 @@ async def premium_elon_callback(update, context):
 
     await context.bot.send_message(
         chat_id=ADMIN_ID,
-        text=f"📦 User {user_id} premium e’lon CALLBACK orqali sotib oldi."
-    )
-
-
-async def vip_aktiv(update, context):
-    user_id = update.message.from_user.id
-
-    cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
-    result = cursor.fetchone()
-
-    if not result:
-        await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
-        return
-
-    balans = result[0]
-    if balans < VIP_NARX:
-        await update.message.reply_text(
-            f"❌ Balansingiz yetarli emas. VIP olish uchun {VIP_NARX} so‘m kerak.\n"
-            "💳 Balansni to‘ldiring: /hisobim"
-        )
-        return
-
-    vip_muddati = datetime.datetime.now() + datetime.timedelta(days=30)
-    cursor.execute("""
-        UPDATE foydalanuvchilar 
-        SET balans = balans - ?, sarflangan = sarflangan + ?, vip = 1, vip_muddati = ?
-        WHERE user_id = ?
-    """, (VIP_NARX, VIP_NARX, vip_muddati.strftime('%Y-%m-%d'), user_id))
-    conn.commit()
-
-    await update.message.reply_text(
-        "👑 VIP statusingiz 30 kun davomida faollashtirildi!\n\n"
-        "VIP bo‘lsangiz barcha funksiyalar bepul bo‘ladi.",
-        reply_markup=asosiy_menu()
-    )
-
-    await context.bot.send_message(
-        chat_id=ADMIN_ID,
-        text=f"👑 User {user_id} VIP paket sotib oldi. Muddati: {vip_muddati.strftime('%Y-%m-%d')}."
+        text=f"📦 User {user_id} premium e’lonni ID {elon_id} uchun sotib oldi."
     )
