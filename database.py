@@ -1,20 +1,17 @@
-# database.py
-
 import sqlite3
 
 conn = sqlite3.connect('bobex.db', check_same_thread=False)
 cursor = conn.cursor()
 
-# Userlar jadvali
+# foydalanuvchilar jadvali
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS users (
-    telegram_id INTEGER PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS foydalanuvchilar (
+    user_id INTEGER PRIMARY KEY,
     username TEXT,
     balans INTEGER DEFAULT 0,
-    sarflangan INTEGER DEFAULT 0,
-    vip BOOLEAN DEFAULT 0,
-    vip_muddat TEXT,
-    paket_soni INTEGER DEFAULT 0
+    bonus_berildi BOOLEAN DEFAULT 0,
+    paketlar TEXT DEFAULT 'Yo‘q',
+    toldirilgan INTEGER DEFAULT 0
 )
 ''')
 
