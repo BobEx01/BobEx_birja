@@ -110,6 +110,7 @@ app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^
 
 # --- PREMIUM qilish CALLBACK ---
 app.add_handler(CallbackQueryHandler(premium_vip.premium_elon_callback, pattern='^premium_elon_'))
+app.add_handler(CallbackQueryHandler(yuk_elon.premium_qilish_callback, pattern='^premium_'))
 
 # --- ADMIN XABAR ---
 app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))
