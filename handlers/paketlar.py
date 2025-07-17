@@ -1,7 +1,52 @@
 from database import cursor, conn
 from datetime import datetime, timedelta
-from config import VIP_NARX
+from config import PAKET_10_NARX, VIP_NARX, ADMIN_ID
 from handlers.start import asosiy_menu
+
+async def paketlar_handler(update, context):
+    text = (
+        "🎟 <b>Paketlar va Aksiyalar:</b>\n\n"
+        "1️⃣ 10 ta raqam olish paketi - 186,000 so‘m (33% chegirma)\n"
+        "2️⃣ Har juma kuni - <b>50% chegirma</b> barcha funksiyalar uchun!\n"
+        "3️⃣ VIP tarif - 1,000,000 so‘m (30 kun davomida barcha xizmatlar bepul)\n\n"
+        "🔹 Paket olish uchun: /paket_ol\n"
+        "🔹 VIP paket olish uchun: /vip_paket_ol\n"
+        "🔹 Statistika: /paket_stat"
+    )
+    await update.message.reply_text(text, parse_mode='HTML')
+
+
+async def paket_ol(update, context):
+    user_id = update.message.from_user.id
+    cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
+    result = cursor.fetchone()
+
+    if not result or result[0] < PAKET_10_NARX:
+        await update.message.reply_text(
+            f"❌ Balansingiz yetarli emas. 10 ta paket uchun {PAKET_10_NARX} so‘m kerak.\n"
+            "💳 Balansni to‘ldiring: /hisobim"
+        )
+        return
+
+    # Balansdan yechish va paket berish
+    cursor.execute("""
+        UPDATE foydalanuvchilar 
+        SET balans = balans - ?, sarflangan = sarflangan + ?, paket_soni = paket_soni + 10
+        WHERE user_id = ?
+    """, (PAKET_10_NARX, PAKET_10_NARX, user_id))
+    conn.commit()
+
+    await update.message.reply_text(
+        "✅ 10 ta raqam olish paketi muvaffaqiyatli sotib olindi!\n"
+        "Endi balansdan yechmasdan 10 ta raqam olishingiz mumkin."
+    )
+
+    # Admin xabari
+    await context.bot.send_message(
+        chat_id=ADMIN_ID,
+        text=f"📦 User {user_id} 10 ta raqam olish paketini sotib oldi."
+    )
+
 
 async def vip_paket_ol(update, context):
     user_id = update.message.from_user.id
@@ -20,7 +65,6 @@ async def vip_paket_ol(update, context):
         )
         return
 
-    # VIP paket faollashtirish va balansdan yechish
     vip_muddati = datetime.now() + timedelta(days=30)
     cursor.execute("""
         UPDATE foydalanuvchilar 
@@ -31,15 +75,13 @@ async def vip_paket_ol(update, context):
 
     await update.message.reply_text(
         f"🎉 Tabriklaymiz! VIP paket faollashtirildi.\n"
-        f"📅 Amal qilish muddati: {vip_muddati.strftime('%Y-%m-%d')}\n"
-        f"🏠 Asosiy menyu:", reply_markup=asosiy_menu()
+        f"📅 Amal qilish muddati: {vip_muddati.strftime('%Y-%m-%d')}\n",
+        reply_markup=asosiy_menu()
     )
 
-    # Adminni xabardor qilish
-    ADMIN_ID = 8080091052
     await context.bot.send_message(
         chat_id=ADMIN_ID,
-        text=f"👑 Foydalanuvchi {user_id} VIP paket sotib oldi. VIP muddati: {vip_muddati.strftime('%Y-%m-%d')}."
+        text=f"👑 User {user_id} VIP paket sotib oldi. Muddati: {vip_muddati.strftime('%Y-%m-%d')}."
     )
 
 
