@@ -54,7 +54,7 @@ async def tolov_chek_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"👤 *User ID:* `{user_id}`\n"
             f"💰 *Miqdor:* {miqdor} so‘m\n\n"
             f"✅ Tasdiqlash uchun: `/tasdiqla_{user_id}_{miqdor}`\n\n"
-            "_Eslatma: To‘langan pul faqat xizmatlar uchun sarflanadi va qaytarilmaydi!_"
+            "_Eslatma: To‘langan pul faqat xizmatlar uchun sarflanadi va qaytarib berilmaydi!_"
         )
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
