@@ -1,5 +1,3 @@
-# handlers/raqam_olish.py
-
 from database import cursor, conn
 from config import RAQAM_NARX
 import datetime
@@ -14,7 +12,7 @@ async def raqam_olish_handler(update, context):
     user_id = query.from_user.id
 
     # Foydalanuvchi balansini tekshirish
-    cursor.execute('SELECT balans FROM users WHERE telegram_id=?', (user_id,))
+    cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id=?', (user_id,))
     result = cursor.fetchone()
 
     if not result or result[0] < RAQAM_NARX:
@@ -40,8 +38,8 @@ async def raqam_olish_handler(update, context):
         return
 
     # Balansdan yechish
-    cursor.execute('UPDATE users SET balans = balans - ?, sarflangan = sarflangan + ? WHERE telegram_id=?',
-                   (RAQAM_NARX, RAQAM_NARX, user_id))
+    cursor.execute('UPDATE foydalanuvchilar SET balans = balans - ? WHERE user_id=?',
+                   (RAQAM_NARX, user_id))
     
     # Logga yozish
     cursor.execute('''
