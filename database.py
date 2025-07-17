@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS foydalanuvchilar (
     username TEXT,
     balans INTEGER DEFAULT 0,
     bonus_berildi BOOLEAN DEFAULT 0,
+    paket_soni INTEGER DEFAULT 0,
+    vip_oxirgi TEXT DEFAULT 'Yo‘q',
+    sarflangan INTEGER DEFAULT 0,
     paketlar TEXT DEFAULT 'Yo‘q',
     toldirilgan INTEGER DEFAULT 0
 )
