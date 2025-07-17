@@ -62,40 +62,42 @@ async def tolov_chek_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
             caption=text,
             parse_mode="Markdown"
         )
+        return ConversationHandler.END
     else:
         await update.message.reply_text("❗️ Chek rasmi topilmadi. Iltimos, qayta yuboring.")
         return TOLOV_CHEK
 
-    return ConversationHandler.END
-
 
 async def admin_tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = update.message.text.split('_')
-    if len(args) != 3:
-        await update.message.reply_text("❗️ Noto‘g‘ri format. /tasdiqla_USERID_MIqdor")
-        return
+    try:
+        args = update.message.text.split('_')
+        if len(args) != 3:
+            await update.message.reply_text("❗️ Noto‘g‘ri format. /tasdiqla_USERID_MIqdor")
+            return
 
-    _, user_id, miqdor = args
-    user_id = int(user_id)
-    miqdor = int(miqdor)
+        _, user_id, miqdor = args
+        user_id = int(user_id)
+        miqdor = int(miqdor)
 
-    cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
-    result = cursor.fetchone()
-    if result:
-        yangi_balans = result[0] + miqdor
-        cursor.execute("UPDATE foydalanuvchilar SET balans = ? WHERE user_id = ?", (yangi_balans, user_id))
-        conn.commit()
+        cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
+        result = cursor.fetchone()
 
-        await context.bot.send_message(
-            chat_id=user_id,
-            text=f"✅ To‘lovingiz admin tomonidan tasdiqlandi.\n\nYangi balans: {yangi_balans} so'm.\n\n"
-                 "Bu balans faqat xizmatlar uchun sarflanishi mumkin va qaytarilmaydi."
-        )
-        await update.message.reply_text(f"✅ User {user_id} balansiga {miqdor} so‘m qo‘shildi. Yangi balans: {yangi_balans} so'm.")
-    else:
-        await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
+        if result:
+            yangi_balans = result[0] + miqdor
+            cursor.execute("UPDATE foydalanuvchilar SET balans = ? WHERE user_id = ?", (yangi_balans, user_id))
+            conn.commit()
 
-
-async def ortga_qaytish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=f"✅ To‘lovingiz admin tomonidan tasdiqlandi.\n\nYangi balans: {yangi_balans} so'm.\n\n"
+                     "Bu balans faqat xizmatlar uchun sarflanishi mumkin va qaytarilmaydi."
+            )
+            await update.message.reply_text(
+                f"✅ User {user_id} balansiga {miqdor} so‘m qo‘shildi. Yangi balans: {yangi_balans} so'm."
+            )
+        else:
+            await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Xatolik: {e}")async def ortga_qaytish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🏠 Bosh menyu:", reply_markup=asosiy_menu())
     return ConversationHandler.END
