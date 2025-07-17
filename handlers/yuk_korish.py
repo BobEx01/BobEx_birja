@@ -58,7 +58,7 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, viloyat, tuman = query.data.split('_')
 
     cursor.execute(
-        "SELECT id, qayerdan, qayerga, ogirlik, mashina, narx FROM yuk_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
+        "SELECT id, qayerdan, qayerga, ogirlik, mashina, narx, premium FROM yuk_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
         (viloyat, tuman)
     )
     elonlar = cursor.fetchall()
@@ -68,7 +68,7 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     for elon in elonlar:
-        elon_id, qayerdan, qayerga, ogirlik, mashina, narx = elon
+        elon_id, qayerdan, qayerga, ogirlik, mashina, narx, premium = elon
 
         text = (
             f"🏷 Yuk E’lon ID: {elon_id}\n"
@@ -79,6 +79,9 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"🚚 Mashina turi: {mashina}\n"
             f"💰 Narx: {narx} so‘m\n"
         )
+
+        if premium == 1:
+            text = "💎 PREMIUM E'LON 💎\n\n" + text
 
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton(f"📞 Raqam olish ({RAQAM_NARX} so‘m)", callback_data=f"yuk_raqam_{elon_id}")
