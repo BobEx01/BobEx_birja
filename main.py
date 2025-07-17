@@ -89,6 +89,9 @@ app.add_handler(shofyor_elon_conv)
 
 # --- E'LON KO‘RISH ---
 app.add_handler(MessageHandler(filters.Regex("^📦 Yuk e'lonlarini ko‘rish$"), yuk_korish.yuk_korish))
+app.add_handler(CallbackQueryHandler(yuk_korish.viloyatlarni_korish, pattern='^viloyat_'))
+app.add_handler(CallbackQueryHandler(yuk_korish.tumanlarni_korish, pattern='^tuman_'))
+
 app.add_handler(MessageHandler(filters.Regex("^🚚 Shofyor e'lonlarini ko‘rish$"), shofyor_korish.shofyor_korish))
 
 # --- RAQAM OLISH CALLBACK ---
