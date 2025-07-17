@@ -54,7 +54,7 @@ async def tolov_chek_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"👤 *User ID:* `{user_id}`\n"
             f"💰 *Miqdor:* {miqdor} so‘m\n\n"
             f"✅ Tasdiqlash uchun: `/tasdiqla_{user_id}_{miqdor}`\n\n"
-            "_Eslatma: To‘langan pul faqat xizmatlar uchun sarflanadi va qaytarib berilmaydi!_"
+            "_Eslatma: To‘langan pul faqat xizmatlar uchun sarflanadi va qaytarilmaydi!_"
         )
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
@@ -98,6 +98,7 @@ async def admin_tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
     except Exception as e:
-        await update.message.reply_text(f"❌ Xatolik: {e}")async def ortga_qaytish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_text(f"❌ Xatolik: {e}")
+        async def ortga_qaytish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🏠 Bosh menyu:", reply_markup=asosiy_menu())
     return ConversationHandler.END
