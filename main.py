@@ -49,6 +49,8 @@ app.add_handler(MessageHandler(filters.Regex(r'^/tasdiqla_'), hisob_tolidirish.a
 # --- PAKETLAR ---
 app.add_handler(MessageHandler(filters.Regex("^🎁 Paketlar$"), paketlar.paketlar_handler))
 app.add_handler(CommandHandler('paket_ol', paketlar.paket_ol))
+app.add_handler(CommandHandler('vip_paket_ol', paketlar.vip_paket_ol))
+app.add_handler(CommandHandler('paket_stat', paketlar.paket_stat))
 
 # --- PREMIUM/VIP ---
 app.add_handler(CommandHandler('premium', premium_vip.premium_elon))
