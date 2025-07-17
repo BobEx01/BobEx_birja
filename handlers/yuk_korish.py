@@ -4,6 +4,7 @@ from database import cursor
 from config import RAQAM_NARX
 from handlers.start import asosiy_menu
 
+
 async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cursor.execute("SELECT viloyat, COUNT(*) FROM yuk_elonlar GROUP BY viloyat")
     viloyatlar = cursor.fetchall()
@@ -34,7 +35,7 @@ async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tumanlar = cursor.fetchall()
 
     if not tumanlar:
-        await query.message.reply_text("Bu viloyatda hozircha e’lon mavjud emas.")
+        await query.edit_message_text("Bu viloyatda hozircha e’lon mavjud emas.", reply_markup=asosiy_menu())
         return
 
     keyboard = []
@@ -48,7 +49,7 @@ async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")
     ])
 
-    await query.message.reply_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
+    await query.edit_message_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -63,7 +64,7 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elonlar = cursor.fetchall()
 
     if not elonlar:
-        await query.message.reply_text("Bu tumanda yuk e’lonlari topilmadi.")
+        await query.edit_message_text("Bu tumanda yuk e’lonlari topilmadi.", reply_markup=asosiy_menu())
         return
 
     for elon in elonlar:
@@ -95,14 +96,16 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def orqaga_viloyatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await yuk_korish(update, context)
+    query = update.callback_query
+    await query.answer()
+    await yuk_korish(query, context)
 
 
 async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     viloyat = query.data.split('_')[2]
-    await tumanlar_korish(query, context)
+    await tumanlar_korish(update, context)
 
 
 async def asosiy_menyu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
