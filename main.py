@@ -112,7 +112,7 @@ app.add_handler(CallbackQueryHandler(premium_vip.premium_elon_callback, pattern=
 app.add_handler(CallbackQueryHandler(yuk_elon.premium_qilish_callback, pattern='^premium_'))
 
 # --- SHOFYOR uchun PREMIUM, UZAYTIRISH, O‘CHIRISH ---
-app.add_handler(CallbackQueryHandler(premium_vip.premium_qilish_callback, pattern='^premium_shofyor_'))
+app.add_handler(CallbackQueryHandler(shofyor_elon.premium_qilish_callback, pattern='^premium_shofyor_'))
 app.add_handler(CallbackQueryHandler(shofyor_elon.uzaytirish_callback, pattern='^uzaytir_shofyor_'))
 app.add_handler(CallbackQueryHandler(shofyor_elon.ochirish_callback, pattern='^ochir_shofyor_'))
 
