@@ -4,17 +4,17 @@ from database import cursor
 from handlers.start import asosiy_menu
 
 
-async def elonlarim(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def elonlarim_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
-    # YUK ELONLARI
+    # Yuk e'lonlari
     cursor.execute("""
         SELECT id, qayerdan, qayerga, ogirlik, mashina, narx, premium, sanasi, muddat, korilgan, raqam_olingan
         FROM yuk_elonlar WHERE user_id = ?
     """, (user_id,))
     yuk_elonlar = cursor.fetchall()
 
-    # SHOYOR ELONLARI
+    # Shofyor e'lonlari
     cursor.execute("""
         SELECT id, qayerdan, qayerga, ism, tel, narx, premium, sanasi, muddat, korilgan, raqam_olingan
         FROM shofyor_elonlar WHERE user_id = ?
@@ -29,7 +29,7 @@ async def elonlarim(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elon_id, qayerdan, qayerga, ogirlik, mashina, narx, premium, sanasi, muddat, korilgan, raqam_olingan = elon
             javob += (
                 f"🆔 ID: {elon_id}\n"
-                f"📍 Qayerdan: {qayerdan} -> {qayerga}\n"
+                f"📍 Qayerdan: {qayerdan} ➡️ {qayerga}\n"
                 f"⚖️ Og‘irligi: {ogirlik}\n"
                 f"🚚 Mashina: {mashina}\n"
                 f"💰 Narx: {narx} so‘m\n"
@@ -46,7 +46,7 @@ async def elonlarim(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elon_id, qayerdan, qayerga, ism, tel, narx, premium, sanasi, muddat, korilgan, raqam_olingan = elon
             javob += (
                 f"🆔 ID: {elon_id}\n"
-                f"📍 Qayerdan: {qayerdan} -> {qayerga}\n"
+                f"📍 Qayerdan: {qayerdan} ➡️ {qayerga}\n"
                 f"🧑‍✈️ Ism: {ism}\n"
                 f"📞 Tel: {tel}\n"
                 f"💰 Narx: {narx} so‘m\n"
@@ -58,7 +58,7 @@ async def elonlarim(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
     if javob == "":
-        javob = "Sizda hali hech qanday e’lon mavjud emas."
+        javob = "❗️Sizda hali hech qanday e’lon mavjud emas."
 
     # Tugmalar
     keyboard = InlineKeyboardMarkup([
