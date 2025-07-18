@@ -21,7 +21,7 @@ from handlers import (
     shofyor_korish, 
     raqam_olish,
     admin_xabar,
-    elonlarim  # 👉 yangi qo‘shildi
+    elonlarim  # 👉 qo‘shilgan
 )
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -114,8 +114,7 @@ app.add_handler(CallbackQueryHandler(yuk_elon.premium_qilish_callback, pattern='
 app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))
 
 # ✅ ELONLARIM tugmasi
-app.add_handler(MessageHandler(filters.Regex("^🗂 E'lonlarim$"), elonlarim.elonlarim_handler))
-
+app.add_handler(MessageHandler(filters.Regex("^🗂 E'lonlarim$"), elonlarim.elonlarim))
 
 print("🤖 BobEx Bot to‘liq ishga tushdi...")
 
