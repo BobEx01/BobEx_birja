@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS tolov_log (
 
 conn.commit()
 
+
 # === ✅ Funksiyalar ===
 
 def foydalanuvchi_qoshish(user_id: int, username: str):
