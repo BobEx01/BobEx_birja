@@ -110,4 +110,4 @@ async def orqaga_tumanlar_shofyor(update: Update, context: ContextTypes.DEFAULT_
 async def asosiy_menyu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-   await query.message.reply_text("Xabar yuboring:")
+    await query.message.reply_text("Xabar yuboring:")
