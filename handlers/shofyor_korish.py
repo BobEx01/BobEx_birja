@@ -1,4 +1,4 @@
-from database import cursor
+from database import cursor, db
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from config import RAQAM_NARX
@@ -54,7 +54,7 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, _, viloyat, tuman = query.data.split('_', 3)
 
     cursor.execute(
-        "SELECT id, mashina, sigim, narx FROM shofyor_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
+        "SELECT id, mashina, sigim, narx, korilgan FROM shofyor_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
         (viloyat, tuman)
     )
     elonlar = cursor.fetchall()
@@ -64,7 +64,14 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     for elon in elonlar:
-        elon_id, mashina, sigim, narx = elon
+        elon_id, mashina, sigim, narx, korilgan = elon
+
+        # ko‘rilganlar sonini +1 qilish
+        cursor.execute(
+            "UPDATE shofyor_elonlar SET korilgan = korilgan + 1 WHERE id = ?",
+            (elon_id,)
+        )
+        db.commit()
 
         text = (
             f"🏷 E’lon ID: {elon_id}\n"
@@ -72,6 +79,7 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"🚚 Mashina: {mashina}\n"
             f"⚖️ Sig‘im: {sigim}\n"
             f"💰 Narx: {narx} so‘m\n"
+            f"👁 Ko‘rilgan: {korilgan + 1} marta\n"
         )
 
         keyboard = InlineKeyboardMarkup([[
@@ -105,5 +113,4 @@ async def orqaga_tumanlar_shofyor(update: Update, context: ContextTypes.DEFAULT_
 
 async def asosiy_menyu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
-    await query.message.reply_text("🏠 Bosh menyu:", reply_markup=asosiy_menu())
+    await query.answer()await query.message.reply_text("🏠 Bosh menyu:", reply_markup=asosiy_menu())
