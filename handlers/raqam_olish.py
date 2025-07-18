@@ -47,6 +47,12 @@ async def raqam_olish_handler(update, context):
     VALUES (?, ?, ?, ?)
     ''', (user_id, elon_id, elon_turi, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
+    # KORILGAN SONINI +1 QILISH
+    if elon_turi == 'yuk':
+        cursor.execute('UPDATE yuk_elonlar SET korilgan = korilgan + 1 WHERE id=?', (elon_id,))
+    else:
+        cursor.execute('UPDATE shofyor_elonlar SET korilgan = korilgan + 1 WHERE id=?', (elon_id,))
+
     conn.commit()
 
     await query.edit_message_text(
