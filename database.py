@@ -18,6 +18,14 @@ CREATE TABLE IF NOT EXISTS foydalanuvchilar (
 )
 ''')
 
+# --- referal_id ustuni mavjudligini tekshirish va yo‘q bo‘lsa qo‘shish ---
+cursor.execute("PRAGMA table_info(foydalanuvchilar)")
+ustunlar = [row[1] for row in cursor.fetchall()]
+if 'referal_id' not in ustunlar:
+    cursor.execute('ALTER TABLE foydalanuvchilar ADD COLUMN referal_id INTEGER DEFAULT 0')
+    conn.commit()
+
+
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS yuk_elonlar (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
