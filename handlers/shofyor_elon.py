@@ -103,9 +103,9 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ Shofyor e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
     await update.message.reply_text(
-        "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\n""Premium e’loningiz doimo yuqorida chiqadi.",
+        "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\nPremium e’loningiz doimo yuqorida chiqadi.",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("💎 Premium qilish (10,000 so‘m)", callback_data=f"premium_shofyor_{context.user_data['user_id']}_{context.user_data['sanasi']}")]
+            [InlineKeyboardButton("💎 Premium qilish (10,000 so‘m)", callback_data=f"premium_shofyor_{context.user_data['user_id']}|{context.user_data['sanasi']}")]
         ])
     )
 
@@ -118,20 +118,15 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     query = update.callback_query
     await query.answer()
 
-    data = query.data.split('_')
-    _, _, user_id, sanasi = data
-    user_id = int(user_id)
+    data = query.data.split('_', 2)[-1]
+    user_id_str, sanasi = data.split('|')
+    user_id = int(user_id_str)
 
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id=?', (user_id,))
     result = cursor.fetchone()
 
-    if not result:
-        await query.edit_message_text("❌ Foydalanuvchi topilmadi.")
-        return
-
-    balans = result[0]
-    if balans < PREMIUM_ELON_NARX:
-        await query.edit_message_text("❌ Balansingiz yetarli emas. Premium uchun balansingizni to‘ldiring.")
+    if not result or result[0] < PREMIUM_ELON_NARX:
+        await query.edit_message_text("❌ Balansingiz yetarli emas yoki topilmadi. Avval balansni to‘ldiring.")
         return
 
     cursor.execute('''
@@ -156,8 +151,8 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
     elon = cursor.fetchone()
     if elon:
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("✅ Uzaytirish", callback_data=f"uzaytir_shofyor_{user_id}_{sanasi}")],
-            [InlineKeyboardButton("❌ O‘chirish", callback_data=f"ochir_shofyor_{user_id}_{sanasi}")]
+            [InlineKeyboardButton("✅ Uzaytirish", callback_data=f"uzaytir_shofyor_{user_id}|{sanasi}")],
+            [InlineKeyboardButton("❌ O‘chirish", callback_data=f"ochir_shofyor_{user_id}|{sanasi}")]
         ])
         await context.bot.send_message(chat_id=user_id, text="⏳ E'loningiz muddati tugadi. Uzaytirasizmi?", reply_markup=keyboard)
 
@@ -166,9 +161,9 @@ async def uzaytirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     query = update.callback_query
     await query.answer()
 
-    data = query.data.split('_')
-    _, _, user_id, sanasi = data
-    user_id = int(user_id)
+    data = query.data.split('_', 2)[-1]
+    user_id_str, sanasi = data.split('|')
+    user_id = int(user_id_str)
 
     cursor.execute('''
         UPDATE shofyor_elonlar SET sanasi=? WHERE user_id=? AND sanasi=?
@@ -182,9 +177,9 @@ async def ochirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    data = query.data.split('_')
-    _, _, user_id, sanasi = data
-    user_id = int(user_id)
+    data = query.data.split('_', 2)[-1]
+    user_id_str, sanasi = data.split('|')
+    user_id = int(user_id_str)
 
     cursor.execute('''
         DELETE FROM shofyor_elonlar WHERE user_id=? AND sanasi=?
