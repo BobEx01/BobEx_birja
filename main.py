@@ -21,7 +21,8 @@ from handlers import (
     shofyor_korish, 
     raqam_olish,
     admin_xabar,
-    elonlarim
+    elonlarim,
+    pul_ishlash  # 👈 YANGI QO‘SHILGAN
 )
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -115,6 +116,9 @@ app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.
 
 # ✅ ELONLARIM tugmasi
 app.add_handler(MessageHandler(filters.Regex("^🗂 E'lonlarim$"), elonlarim.elonlarim_handler))
+
+# ✅ Pul ishlash tugmasi
+app.add_handler(MessageHandler(filters.Regex("^💸 Pul ishlash$"), pul_ishlash.pul_ishlash_handler))
 
 print("🤖 BobEx Bot to‘liq ishga tushdi...")
 
