@@ -2,6 +2,8 @@ from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
 from database import cursor, conn
 
+BONUS_MIQDORI = 2000
+
 # Asosiy menyu funksiyasi
 def asosiy_menu():
     keyboard = [
@@ -15,26 +17,38 @@ def asosiy_menu():
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
 
+async def bonus_berish(referal_id: int, context):
+    try:
+        cursor.execute("UPDATE foydalanuvchilar SET balans = balans + ? WHERE user_id = ?", (BONUS_MIQDORI, referal_id))
+        conn.commit()
+        await context.bot.send_message(
+            chat_id=int(referal_id),
+            text=f"🎉 Tabriklaymiz! Siz referal orqali yangi foydalanuvchini taklif qildingiz va {BONUS_MIQDORI} so‘m bonus oldingiz."
+        )
+    except Exception as e:
+        print(f"Referal bonus yuborishda xato: {e}")
+
+
 # /start komandasi uchun funksiya
 async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     user_id = user.id
+    username = user.username or ""
 
-    # REFERAL orqali kirgan bo‘lsa, referal_id saqlash
+    # Foydalanuvchini bazaga qo‘shish (agar yo‘q bo‘lsa)
+    cursor.execute("INSERT OR IGNORE INTO foydalanuvchilar (user_id, username) VALUES (?, ?)", (user_id, username))
+    conn.commit()
+
+    # REFERAL orqali kirgan bo‘lsa
     if context.args:
         referal_id = context.args[0]
-        if referal_id != str(user_id):  # O'zini referal qilmang
+        if referal_id != str(user_id):
             cursor.execute("SELECT referal_id FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
-            existing = cursor.fetchone()
-            if existing is None:
-                cursor.execute(
-                    "INSERT INTO foydalanuvchilar (user_id, referal_id, balans, bonus_berildi, paket_soni, toldirilgan, vip_oxirgi, sarflangan) "
-                    "VALUES (?, ?, 0, 0, 0, 0, '', 0)",
-                    (user_id, referal_id)
-                )
-            elif existing[0] == 0:
+            result = cursor.fetchone()
+            if result and (result[0] == 0 or result[0] is None):
                 cursor.execute("UPDATE foydalanuvchilar SET referal_id = ? WHERE user_id = ?", (referal_id, user_id))
-            conn.commit()
+                conn.commit()
+                await bonus_berish(int(referal_id), context)
 
     await update.message.reply_text(
         f"👋 Assalomu alaykum, BobEx botiga xush kelibsiz, {user.first_name}!\n\n"
