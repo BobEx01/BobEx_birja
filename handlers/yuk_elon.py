@@ -99,8 +99,10 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['telefon'] = update.message.text
     context.user_data['user_id'] = update.message.from_user.id
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    context.user_data['muddat'] = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
 
-    cursor.execute('''INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, premium)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    cursor.execute('''INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         context.user_data['user_id'],
         context.user_data['viloyat'],
@@ -112,12 +114,14 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['narx'],
         context.user_data['telefon'],
         context.user_data['sanasi'],
+        context.user_data['muddat'],
         0
     ))
     conn.commit()
 
     await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
+    # PREMIUM qilish
     await update.message.reply_text(
         "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\n"
         "Premium e’loningiz doimo yuqorida ko‘rsatiladi.",
