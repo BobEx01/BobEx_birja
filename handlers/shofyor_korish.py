@@ -43,10 +43,8 @@ async def shofyor_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")
     ])
 
-    await query.message.reply_text(
-        f"{viloyat} viloyati uchun tumanlardan birini tanlang:",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await query.message.reply_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:",
+                                   reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -56,7 +54,7 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, _, viloyat, tuman = query.data.split('_', 3)
 
     cursor.execute(
-        "SELECT id, mashina, sigim, narx, korilgan, raqam_olingan FROM shofyor_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
+        "SELECT id, mashina, sigim, narx, korilgan FROM shofyor_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
         (viloyat, tuman)
     )
     elonlar = cursor.fetchall()
@@ -66,8 +64,9 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     for elon in elonlar:
-        elon_id, mashina, sigim, narx, korilgan, raqam_olingan = elon
+        elon_id, mashina, sigim, narx, korilgan = elon
 
+        # Korilganlarni +1 qilish
         cursor.execute("UPDATE shofyor_elonlar SET korilgan = korilgan + 1 WHERE id = ?", (elon_id,))
         connection.commit()
 
@@ -78,7 +77,6 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"⚖️ Sig‘im: {sigim}\n"
             f"💰 Narx: {narx} so‘m\n"
             f"👁 Ko‘rilgan: {korilgan + 1} marta\n"
-            f"📞 Raqam olingan: {raqam_olingan} marta\n"
         )
 
         keyboard = InlineKeyboardMarkup([[
@@ -98,7 +96,7 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def orqaga_viloyatlar_shofyor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await shofyor_korish(query, context)
+    await shofyor_korish(update, context)
 
 
 async def orqaga_tumanlar_shofyor(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -107,7 +105,7 @@ async def orqaga_tumanlar_shofyor(update: Update, context: ContextTypes.DEFAULT_
 
     parts = query.data.split('_')
     viloyat = parts[-1]
-    await shofyor_tumanlar(query, context)
+    await shofyor_tumanlar(update, context)
 
 
 async def asosiy_menyu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
