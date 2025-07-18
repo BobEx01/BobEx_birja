@@ -4,6 +4,7 @@ import datetime
 import asyncio
 from database import cursor, conn
 from handlers.start import asosiy_menu
+from config import PREMIUM_ELON_NARX
 
 
 def viloyatlar_keyboard():
@@ -101,7 +102,8 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     context.user_data['muddat'] = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
 
-    cursor.execute('''INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
+    cursor.execute('''
+        INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         context.user_data['user_id'],
@@ -121,7 +123,6 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
-    # PREMIUM qilish
     await update.message.reply_text(
         "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\n"
         "Premium e’loningiz doimo yuqorida ko‘rsatiladi.",
@@ -143,6 +144,22 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     data = query.data.split('_')
     user_id, sanasi = data[1], data[2]
 
+    # Balans tekshirish
+    cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
+    result = cursor.fetchone()
+
+    if not result or result[0] < PREMIUM_ELON_NARX:
+        await query.edit_message_text("❌ Balansingiz yetarli emas yoki topilmadi. Avval balansni to‘ldiring.")
+        return
+
+    # Balansdan pul yechish
+    cursor.execute('''
+        UPDATE foydalanuvchilar
+        SET balans = balans - ?, sarflangan = sarflangan + ?
+        WHERE user_id = ?
+    ''', (PREMIUM_ELON_NARX, PREMIUM_ELON_NARX, user_id))
+
+    # E'lonni Premium qilish
     cursor.execute('UPDATE yuk_elonlar SET premium=1 WHERE user_id=? AND sanasi=?', (user_id, sanasi))
     conn.commit()
 
