@@ -1,4 +1,4 @@
-from database import cursor, connection
+from database import cursor
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from config import RAQAM_NARX
@@ -67,7 +67,8 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elon_id, mashina, sigim, narx, korilgan = elon
 
         cursor.execute("UPDATE shofyor_elonlar SET korilgan = korilgan + 1 WHERE id = ?", (elon_id,))
-        connection.commit()
+        # connection.commit() ni olib tashladik
+        cursor.connection.commit()
 
         text = (
             f"🏷 E’lon ID: {elon_id}\n"
