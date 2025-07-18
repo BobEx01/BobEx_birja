@@ -1,9 +1,9 @@
 import sqlite3
 
-conn = sqlite3.connect('bobex.db', check_same_thread=False)
-cursor = conn.cursor()
+connection = sqlite3.connect('bobex.db', check_same_thread=False)
+cursor = connection.cursor()
 
-# --- Foydalanuvchilar jadvali ---
+# Foydalanuvchilar jadvali
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS foydalanuvchilar (
     user_id INTEGER PRIMARY KEY,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS foydalanuvchilar (
 )
 ''')
 
-# --- Yuk e'lonlar ---
+# Yuk e'lonlar
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS yuk_elonlar (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS yuk_elonlar (
 )
 ''')
 
-# --- Shofyor e'lonlar ---
+# Shofyor e'lonlar
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS shofyor_elonlar (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS shofyor_elonlar (
 )
 ''')
 
-# --- Olingan raqamlar ---
+# Raqamlar olingan
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS raqamlar_olingan (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS raqamlar_olingan (
 )
 ''')
 
-# --- Tolov loglari ---
+# Tolov log
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS tolov_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,18 +83,18 @@ CREATE TABLE IF NOT EXISTS tolov_log (
 )
 ''')
 
-conn.commit()
+connection.commit()
 
 
-# === ✅ Funksiyalar ===
+# === Funksiyalar ===
 
 def foydalanuvchi_qoshish(user_id: int, username: str):
     cursor.execute("INSERT OR IGNORE INTO foydalanuvchilar (user_id, username) VALUES (?, ?)", (user_id, username))
-    conn.commit()
+    connection.commit()
 
 def balans_oshirish(user_id: int, miqdor: int):
     cursor.execute("UPDATE foydalanuvchilar SET balans = balans + ? WHERE user_id = ?", (miqdor, user_id))
-    conn.commit()
+    connection.commit()
 
 def balans_olish(user_id: int):
     cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
@@ -105,23 +105,23 @@ def raqam_olingan_qoshish(user_id: int, elon_id: int, elon_turi: str, sanasi: st
     cursor.execute('''
     INSERT INTO raqamlar_olingan (user_id, elon_id, elon_turi, sanasi) VALUES (?, ?, ?, ?)
     ''', (user_id, elon_id, elon_turi, sanasi))
-    conn.commit()
+    connection.commit()
 
 def raqam_olingan_soni_yuk(elon_id: int):
     cursor.execute("UPDATE yuk_elonlar SET raqam_olingan = raqam_olingan + 1 WHERE id = ?", (elon_id,))
-    conn.commit()
+    connection.commit()
 
 def raqam_olingan_soni_shofyor(elon_id: int):
     cursor.execute("UPDATE shofyor_elonlar SET raqam_olingan = raqam_olingan + 1 WHERE id = ?", (elon_id,))
-    conn.commit()
+    connection.commit()
 
 def elon_korilgan_yuk(elon_id: int):
     cursor.execute("UPDATE yuk_elonlar SET korilgan = korilgan + 1 WHERE id = ?", (elon_id,))
-    conn.commit()
+    connection.commit()
 
 def elon_korilgan_shofyor(elon_id: int):
     cursor.execute("UPDATE shofyor_elonlar SET korilgan = korilgan + 1 WHERE id = ?", (elon_id,))
-    conn.commit()
+    connection.commit()
 
 def foydalanuvchi_mavjudmi(user_id: int):
     cursor.execute("SELECT 1 FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
@@ -131,4 +131,4 @@ def tolov_log_qoshish(user_id: int, summa: int, sana: str, izoh: str):
     cursor.execute('''
     INSERT INTO tolov_log (user_id, summa, sana, izoh) VALUES (?, ?, ?, ?)
     ''', (user_id, summa, sana, izoh))
-    conn.commit()
+    connection.commit()
