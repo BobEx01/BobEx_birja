@@ -1,4 +1,4 @@
-from database import cursor, db
+from database import cursor, connection
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from config import RAQAM_NARX
@@ -43,8 +43,10 @@ async def shofyor_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")
     ])
 
-    await query.message.reply_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:",
-                                   reply_markup=InlineKeyboardMarkup(keyboard))
+    await query.message.reply_text(
+        f"{viloyat} viloyati uchun tumanlardan birini tanlang:",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
 
 async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -54,7 +56,7 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, _, viloyat, tuman = query.data.split('_', 3)
 
     cursor.execute(
-        "SELECT id, mashina, sigim, narx, korilgan FROM shofyor_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
+        "SELECT id, mashina, sigim, narx, korilgan, raqam_olingan FROM shofyor_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
         (viloyat, tuman)
     )
     elonlar = cursor.fetchall()
@@ -64,14 +66,11 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     for elon in elonlar:
-        elon_id, mashina, sigim, narx, korilgan = elon
+        elon_id, mashina, sigim, narx, korilgan, raqam_olingan = elon
 
-        # ko‘rilganlar sonini +1 qilish
-        cursor.execute(
-            "UPDATE shofyor_elonlar SET korilgan = korilgan + 1 WHERE id = ?",
-            (elon_id,)
-        )
-        db.commit()
+        # Ko‘rilgan sonini oshirish
+        cursor.execute("UPDATE shofyor_elonlar SET korilgan = korilgan + 1 WHERE id = ?", (elon_id,))
+        connection.commit()
 
         text = (
             f"🏷 E’lon ID: {elon_id}\n"
@@ -80,6 +79,7 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"⚖️ Sig‘im: {sigim}\n"
             f"💰 Narx: {narx} so‘m\n"
             f"👁 Ko‘rilgan: {korilgan + 1} marta\n"
+            f"📞 Raqam olingan: {raqam_olingan} marta\n"
         )
 
         keyboard = InlineKeyboardMarkup([[
@@ -111,7 +111,6 @@ async def orqaga_tumanlar_shofyor(update: Update, context: ContextTypes.DEFAULT_
     await shofyor_tumanlar(query, context)
 
 
-async def asosiy_menyu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
+async def asosiy_menyu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):query = update.callback_query
     await query.answer()
     await query.message.reply_text("🏠 Bosh menyu:", reply_markup=asosiy_menu())
