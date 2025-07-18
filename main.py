@@ -74,7 +74,7 @@ yuk_elon_conv = ConversationHandler(
 )
 app.add_handler(yuk_elon_conv)
 
-# --- SHOYOR ELON ---
+# --- SHOFYOR ELON ---
 shofyor_elon_conv = ConversationHandler(
     entry_points=[MessageHandler(filters.Regex("^🚚 Shofyor e'lon berish$"), shofyor_elon.shofyor_elon_start)],
     states={
@@ -92,28 +92,25 @@ app.add_handler(shofyor_elon_conv)
 # --- E'LON KO‘RISH ---
 app.add_handler(MessageHandler(filters.Regex("^📦 Yuk e'lonlarini ko‘rish$"), yuk_korish.yuk_korish))
 app.add_handler(MessageHandler(filters.Regex("^🚚 Shofyor e'lonlarini ko‘rish$"), shofyor_korish.shofyor_korish))
-
-# YUK e'lonlari navigatsiyasi
 app.add_handler(CallbackQueryHandler(yuk_korish.tumanlar_korish, pattern='^viloyat_'))
 app.add_handler(CallbackQueryHandler(yuk_korish.elonlar_korish, pattern='^tuman_'))
 app.add_handler(CallbackQueryHandler(yuk_korish.orqaga_viloyatlar, pattern='^orqaga_viloyatlar$'))
 app.add_handler(CallbackQueryHandler(yuk_korish.orqaga_tumanlar, pattern='^orqaga_tumanlar_'))
 
-# SHOFYOR e'lonlari navigatsiyasi
 app.add_handler(CallbackQueryHandler(shofyor_korish.shofyor_tumanlar, pattern='^shof_vil_'))
 app.add_handler(CallbackQueryHandler(shofyor_korish.shofyor_elonlar, pattern='^shof_tum_'))
 app.add_handler(CallbackQueryHandler(shofyor_korish.orqaga_viloyatlar_shofyor, pattern='^orqaga_viloyatlar_shofyor$'))
 app.add_handler(CallbackQueryHandler(shofyor_korish.orqaga_tumanlar_shofyor, pattern='^orqaga_tumanlar_shofyor_'))
 app.add_handler(CallbackQueryHandler(shofyor_korish.asosiy_menyu_handler, pattern='^asosiy_menyu$'))
 
-# RAQAM OLISH CALLBACK
+# --- RAQAM OLISH CALLBACK ---
 app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
 
-# PREMIUM qilish CALLBACK
+# --- PREMIUM qilish CALLBACK ---
 app.add_handler(CallbackQueryHandler(premium_vip.premium_elon_callback, pattern='^premium_elon_'))
 app.add_handler(CallbackQueryHandler(yuk_elon.premium_qilish_callback, pattern='^premium_'))
 
-# ADMIN XABAR
+# --- ADMIN XABAR ---
 app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))
 
 # ✅ ELONLARIM tugmasi
