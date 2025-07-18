@@ -4,10 +4,12 @@ from database import cursor, conn
 from handlers.start import asosiy_menu
 
 BONUS_MIqdori = 50000
+REFERAL_BONUS = 2000
 
 async def hisobim_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
+    # Foydalanuvchi ma'lumotlari
     cursor.execute("SELECT balans, bonus_berildi, paket_soni, toldirilgan, vip_oxirgi, sarflangan FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
     user_data = cursor.fetchone()
 
@@ -33,6 +35,11 @@ async def hisobim_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     vip_muddat = vip_oxirgi if vip_oxirgi else "Yo‘q"
 
+    # Referal orqali taklif qilganlar sonini olish
+    cursor.execute("SELECT COUNT(*) FROM foydalanuvchilar WHERE referal_id = ?", (user_id,))
+    referal_soni = cursor.fetchone()[0]
+    referal_bonus = referal_soni * REFERAL_BONUS
+
     text = (
         f"📊 *Hisobingiz haqida ma'lumot:*\n\n"
         f"🆔 Foydalanuvchi ID: `{user_id}`\n"
@@ -41,7 +48,9 @@ async def hisobim_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"👑 VIP paket muddati: {vip_muddat}\n"
         f"➕ To‘ldirilgan summa: {toldirilgan} so'm\n"
         f"📈 Umumiy sarflangan: {sarflangan} so'm\n"
-        f"🎉 Bonus: {BONUS_MIqdori} so'm (faqat bir marta beriladi)\n\n"
+        f"🎉 Bonus: {BONUS_MIqdori} so'm (faqat bir marta beriladi)\n"
+        f"👥 Taklif qilgan odamlari: {referal_soni} ta\n"
+        f"💸 Referal bonuslari: {referal_bonus} so'm\n\n"
         "_Balans faqat xizmatlar uchun sarflanadi va qaytarilmaydi._"
     )
 
