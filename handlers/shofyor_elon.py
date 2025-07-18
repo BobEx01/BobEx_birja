@@ -117,7 +117,7 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     query = update.callback_query
     await query.answer()
 
-    data = query.data.split('_', 2)[-1]
+    data = query.data.replace('premium_shofyor_', '')
     user_id_str, sanasi = data.split('|')
     user_id = int(user_id_str)
 
