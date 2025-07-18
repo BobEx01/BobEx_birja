@@ -1,8 +1,9 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes, ConversationHandler
-from database import cursor
+from telegram.ext import ContextTypes
+from database import cursor, conn
 from config import RAQAM_NARX
 from handlers.start import asosiy_menu
+import asyncio
 
 
 async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -18,7 +19,7 @@ async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard.append([
             InlineKeyboardButton(f"{viloyat} ({count} ta)", callback_data=f"viloyat_{viloyat}")
         ])
-    
+
     keyboard.append([
         InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")
     ])
@@ -43,7 +44,7 @@ async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard.append([
             InlineKeyboardButton(f"{tuman} ({count} ta)", callback_data=f"tuman_{viloyat}_{tuman}")
         ])
-    
+
     keyboard.append([
         InlineKeyboardButton("⬅️ Orqaga", callback_data="orqaga_viloyatlar"),
         InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")
@@ -58,7 +59,7 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, viloyat, tuman = query.data.split('_')
 
     cursor.execute(
-        "SELECT id, qayerdan, qayerga, ogirlik, mashina, narx, premium FROM yuk_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
+        "SELECT id, qayerdan, qayerga, ogirlik, mashina, narx, premium, korilgan FROM yuk_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
         (viloyat, tuman)
     )
     elonlar = cursor.fetchall()
@@ -68,7 +69,11 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     for elon in elonlar:
-        elon_id, qayerdan, qayerga, ogirlik, mashina, narx, premium = elon
+        elon_id, qayerdan, qayerga, ogirlik, mashina, narx, premium, korilgan = elon
+
+        # korilgan sonini +1 ga oshiramiz
+        cursor.execute("UPDATE yuk_elonlar SET korilgan = korilgan + 1 WHERE id = ?", (elon_id,))
+        conn.commit()
 
         text = (
             f"🏷 Yuk E’lon ID: {elon_id}\n"
@@ -78,6 +83,7 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"⚖️ Og‘irligi: {ogirlik}\n"
             f"🚚 Mashina turi: {mashina}\n"
             f"💰 Narx: {narx} so‘m\n"
+            f"👁 Ko‘rilgan: {korilgan + 1} marta\n"
         )
 
         if premium == 1:
@@ -109,10 +115,3 @@ async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     viloyat = query.data.split('_')[2]
     await tumanlar_korish(update, context)
-
-
-async def asosiy_menyu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    await query.message.reply_text("🏠 Bosh menyu:", reply_markup=asosiy_menu())
-    return ConversationHandler.END
