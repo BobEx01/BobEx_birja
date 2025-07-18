@@ -2,9 +2,10 @@ from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
 from database import cursor, conn
 
-BONUS_MIQDORI = 2000
+BONUS_MIQDORI = 2000  # Referal orqali bonus miqdori
 
-# Asosiy menyu funksiyasi
+
+# === Asosiy menyu ===
 def asosiy_menu():
     keyboard = [
         ["🚛 Yuk uchun e'lon berish", "🚚 Shofyor e'lon berish"],
@@ -17,6 +18,7 @@ def asosiy_menu():
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
 
+# === Referal bonus berish funksiyasi ===
 async def bonus_berish(referal_id: int, context):
     try:
         cursor.execute("UPDATE foydalanuvchilar SET balans = balans + ? WHERE user_id = ?", (BONUS_MIQDORI, referal_id))
@@ -29,17 +31,17 @@ async def bonus_berish(referal_id: int, context):
         print(f"Referal bonus yuborishda xato: {e}")
 
 
-# /start komandasi uchun funksiya
+# === /start komandasi uchun funksiya ===
 async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     user_id = user.id
     username = user.username or ""
 
-    # Foydalanuvchini bazaga qo‘shish (agar yo‘q bo‘lsa)
+    # Foydalanuvchini bazaga qo‘shish (agar hali qo‘shilmagan bo‘lsa)
     cursor.execute("INSERT OR IGNORE INTO foydalanuvchilar (user_id, username) VALUES (?, ?)", (user_id, username))
     conn.commit()
 
-    # REFERAL orqali kirgan bo‘lsa
+    # Agar /start linkida referal ID bo‘lsa
     if context.args:
         referal_id = context.args[0]
         if referal_id != str(user_id):
