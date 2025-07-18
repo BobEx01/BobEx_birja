@@ -44,11 +44,11 @@ async def premium_elon_callback(update, context):
     await query.answer()
 
     data = query.data.split('_')
-    if len(data) < 4:
+    if len(data) < 5:
         await query.edit_message_text("❌ Ma'lumot noto‘g‘ri keldi.")
         return
 
-    _, _, user_id, sanasi = data
+    _, _, elon_turi, user_id, sanasi = data
     user_id = int(user_id)
 
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
@@ -73,10 +73,16 @@ async def premium_elon_callback(update, context):
     )
 
     # E'lonni Premium qilish
-    cursor.execute(
-        'UPDATE yuk_elonlar SET premium = 1 WHERE user_id = ? AND sanasi = ?',
-        (user_id, sanasi)
-    )
+    if elon_turi == 'yuk':
+        cursor.execute(
+            'UPDATE yuk_elonlar SET premium = 1 WHERE user_id = ? AND sanasi = ?',
+            (user_id, sanasi)
+        )
+    elif elon_turi == 'shofyor':
+        cursor.execute(
+            'UPDATE shofyor_elonlar SET premium = 1 WHERE user_id = ? AND sanasi = ?',
+            (user_id, sanasi)
+        )
 
     conn.commit()
 
@@ -84,7 +90,7 @@ async def premium_elon_callback(update, context):
 
     await context.bot.send_message(
         chat_id=ADMIN_ID,
-        text=f"📦 User {user_id} premium e’lon CALLBACK orqali sotib oldi."
+        text=f"📦 User {user_id} premium e’lon CALLBACK orqali sotib oldi. Turi: {elon_turi}"
     )
 
 
@@ -109,7 +115,7 @@ async def vip_aktiv(update, context):
     vip_muddati = datetime.datetime.now() + datetime.timedelta(days=30)
     cursor.execute("""
         UPDATE foydalanuvchilar 
-        SET balans = balans - ?, sarflangan = sarflangan + ?, vip = 1, vip_muddati = ?
+        SET balans = balans - ?, sarflangan = sarflangan + ?, vip_oxirgi = ?
         WHERE user_id = ?
     """, (VIP_NARX, VIP_NARX, vip_muddati.strftime('%Y-%m-%d'), user_id))
     conn.commit()
@@ -121,6 +127,5 @@ async def vip_aktiv(update, context):
     )
 
     await context.bot.send_message(
-        chat_id=ADMIN_ID,
-        text=f"👑 User {user_id} VIP paket sotib oldi. Muddati: {vip_muddati.strftime('%Y-%m-%d')}."
+        chat_id=ADMIN_ID,text=f"👑 User {user_id} VIP paket sotib oldi. Muddati: {vip_muddati.strftime('%Y-%m-%d')}."
     )
