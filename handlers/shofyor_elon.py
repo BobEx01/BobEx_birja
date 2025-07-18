@@ -28,12 +28,11 @@ def back_button():
 
 def main_menu_keyboard():
     keyboard = [
-        ["🚛 Yuk uchun e'lon berish"],
-        ["🚚 Shofyor e'lon berish"],
-        ["📦 Yuk e'lonlarini ko‘rish"],
-        ["🚚 Shofyor e'lonlarini ko‘rish"],
-        ["💳 Hisobim"],
-        ["🎁 Paketlar"]
+        ["🚛 Yuk uchun e'lon berish", "🚚 Shofyor e'lon berish"],
+        ["📦 Yuk e'lonlarini ko‘rish", "🚚 Shofyor e'lonlarini ko‘rish"],
+        ["🗂 E'lonlarim"],
+        ["💳 Hisobim", "🎁 Paketlar"],
+        ["📞 Admin bilan bog‘lanish"]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
@@ -119,9 +118,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_data['telefon'] = update.message.text
     user_data['user_id'] = update.message.from_user.id
-    user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # E'lonni bazaga yozish (premium = 0 - bepul)
+    user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
     cursor.execute('''
         INSERT INTO shofyor_elonlar
         (user_id, viloyat, tuman, mashina, sigim, narx, telefon, sanasi, premium)VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
@@ -132,7 +129,6 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ))
     conn.commit()
 
-    # Premium taklifini yuborish
     await update.message.reply_text(
         "✅ Shofyor e’loningiz muvaffaqiyatli joylandi!\n\n"
         "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\n"
@@ -142,7 +138,6 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
     )
 
-    # 24 soatlik e'lon muddati monitoringi
     asyncio.create_task(elon_muddat_tugashi(user_data['user_id'], user_data['sanasi'], context))
 
     await update.message.reply_text(
@@ -151,8 +146,6 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     return -1
 
-
-# Premium qilish callback
 async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -168,12 +161,9 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
 
     await query.edit_message_text("✅ E’loningiz endi Premium holatga o‘tkazildi. Rahmat!")
 
-
-# Shofyor raqamlarini faqat abonent to‘lovi qilinganlarga ko‘rsatish
 async def shofyor_raqamlarini_yuborish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
-    # Foydalanuvchi abonentligi va to'lovi tekshiruvi (28.000 so'm)
     cursor.execute(
         "SELECT tolov_miqdori, tolov_sana FROM abonentlar WHERE user_id=? ORDER BY tolov_sana DESC LIMIT 1",
         (user_id,)
@@ -184,17 +174,13 @@ async def shofyor_raqamlarini_yuborish(update: Update, context: ContextTypes.DEF
     if abonent:
         tolov_miqdori, tolov_sana = abonent
         tolov_sana_dt = datetime.datetime.strptime(tolov_sana, "%Y-%m-%d %H:%M:%S")
-        # 30 kun davomida abonent bo'lish sharti
         if tolov_miqdori >= 28000 and (hozirgi_sana - tolov_sana_dt).days <= 30:
-            # To'lov muddati hali o'tmagan - raqamlarni ko'rsatish
             await shofyor_raqamlarini_yuborish_haqiqat(update, context)
             return
-    # Agar abonent bo'lmasa yoki to'lov muddati o'tgan bo'lsa:
     await update.message.reply_text(
         "❌ Siz shofyorlarning telefon raqamlarini ko‘rish uchun 28,000 so‘m to‘lashingiz kerak.\n"
         "To‘lov uchun /tolov buyrug‘ini bosing."
     )
-
 
 async def shofyor_raqamlarini_yuborish_haqiqat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cursor.execute(
@@ -217,11 +203,8 @@ async def shofyor_raqamlarini_yuborish_haqiqat(update: Update, context: ContextT
         )
     await update.message.reply_text(text)
 
-
-# 24 soatlik e'lon muddati tugashi uchun kuzatuv
 async def elon_muddat_tugashi(user_id, sanasi, context):
-    await asyncio.sleep(24 * 60 * 60)  # 24 soat
-
+    await asyncio.sleep(24 * 60 * 60)
     cursor.execute(
         "SELECT * FROM shofyor_elonlar WHERE user_id=? AND sanasi=?",
         (user_id, sanasi)
@@ -237,7 +220,7 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
             reply_markup=keyboard
         )
 
-        await asyncio.sleep(8 * 60 * 60)  # 8 soat
+        await asyncio.sleep(8 * 60 * 60)
 
         cursor.execute(
             "SELECT * FROM shofyor_elonlar WHERE user_id=? AND sanasi=?",
@@ -247,16 +230,13 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
         if check:
             cursor.execute(
                 "DELETE FROM shofyor_elonlar WHERE user_id=? AND sanasi=?",
-                (user_id, sanasi)
-            )
+                (user_id, sanasi))
             conn.commit()
             await context.bot.send_message(
                 chat_id=user_id,
                 text="❌ E'loningiz o‘chirildi."
             )
 
-
-# Callback uchun uzaytirish
 async def uzaytirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
