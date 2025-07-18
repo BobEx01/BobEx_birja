@@ -1,5 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
+from database import cursor, conn
 
 # Asosiy menyu funksiyasi
 def asosiy_menu():
@@ -16,8 +17,27 @@ def asosiy_menu():
 
 # /start komandasi uchun funksiya
 async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.message.from_user
+    user_id = user.id
+
+    # REFERAL orqali kirgan bo‘lsa, referal_id saqlash
+    if context.args:
+        referal_id = context.args[0]
+        if referal_id != str(user_id):  # O'zini referal qilmang
+            cursor.execute("SELECT referal_id FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
+            existing = cursor.fetchone()
+            if existing is None:
+                cursor.execute(
+                    "INSERT INTO foydalanuvchilar (user_id, referal_id, balans, bonus_berildi, paket_soni, toldirilgan, vip_oxirgi, sarflangan) "
+                    "VALUES (?, ?, 0, 0, 0, 0, '', 0)",
+                    (user_id, referal_id)
+                )
+            elif existing[0] == 0:
+                cursor.execute("UPDATE foydalanuvchilar SET referal_id = ? WHERE user_id = ?", (referal_id, user_id))
+            conn.commit()
+
     await update.message.reply_text(
-        "👋 Assalomu alaykum, BobEx botiga xush kelibsiz!\n\n"
+        f"👋 Assalomu alaykum, BobEx botiga xush kelibsiz, {user.first_name}!\n\n"
         "Quyidagi menyulardan birini tanlang:\n\n"
         "🚛 Yuk uchun e'lon berish\n"
         "🚚 Shofyor e'lon berish\n"
