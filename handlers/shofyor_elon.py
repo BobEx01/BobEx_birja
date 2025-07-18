@@ -237,7 +237,8 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
                 "DELETE FROM shofyor_elonlar WHERE user_id=? AND sanasi=?",
                 (user_id, sanasi)
             )
-            conn.commit()await context.bot.send_message(
+            conn.commit()
+            await context.bot.send_message(
                 chat_id=user_id,
                 text="❌ E'loningiz o‘chirildi."
             )
