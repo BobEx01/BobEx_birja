@@ -117,9 +117,17 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     query = update.callback_query
     await query.answer()
 
-    data = query.data.replace('premium_shofyor_', '')
-    user_id_str, sanasi = data.split('|')
-    user_id = int(user_id_str)
+    data = query.data[len('premium_shofyor_'):]
+    if '|' not in data:
+        await query.edit_message_text("❌ Ma'lumotni o‘qishda xato.")
+        return
+
+    user_id_str, sanasi = data.split('|', 1)
+    try:
+        user_id = int(user_id_str)
+    except ValueError:
+        await query.edit_message_text("❌ Noto‘g‘ri foydalanuvchi ID.")
+        return
 
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id=?', (user_id,))
     result = cursor.fetchone()
@@ -166,7 +174,7 @@ async def uzaytirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     await query.answer()
 
     data = query.data.split('_', 2)[-1]
-    user_id_str, sanasi = data.split('|')
+    user_id_str, sanasi = data.split('|', 1)
     user_id = int(user_id_str)
 
     cursor.execute('''
@@ -182,7 +190,7 @@ async def ochirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     data = query.data.split('_', 2)[-1]
-    user_id_str, sanasi = data.split('|')
+    user_id_str, sanasi = data.split('|', 1)
     user_id = int(user_id_str)
 
     cursor.execute('''
