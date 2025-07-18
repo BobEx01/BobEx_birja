@@ -22,7 +22,7 @@ from handlers import (
     raqam_olish,
     admin_xabar,
     elonlarim,
-    pul_ishlash  # 👈 YANGI QO‘SHILGAN
+    pul_ishlash
 )
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
