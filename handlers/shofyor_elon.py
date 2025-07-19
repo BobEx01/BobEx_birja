@@ -106,6 +106,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
 
     await update.message.reply_text("✅ Shofyor e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
+
     await update.message.reply_text(
         "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\nPremium e’loningiz doimo yuqorida chiqadi.",
         reply_markup=InlineKeyboardMarkup([
@@ -114,6 +115,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     asyncio.create_task(elon_muddat_tugashi(user_id, context.user_data['sanasi'], context))
+
     await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
 
@@ -137,13 +139,8 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id=?', (user_id,))
     result = cursor.fetchone()
 
-    if not result:
+    if not result or result[0] < PREMIUM_ELON_NARX:
         await query.edit_message_text("❌ Balansingiz yetarli emas yoki topilmadi. Avval balansni to‘ldiring.")
-        return
-
-    balans = result[0]
-    if balans < PREMIUM_ELON_NARX:
-        await query.edit_message_text("❌ Balansingiz yetarli emas. Premium uchun balansingizni to‘ldiring.")
         return
 
     cursor.execute('''
