@@ -1,4 +1,3 @@
-SCALPING DOMINION, [19.07.2025 22:46]
 import sqlite3
 
 conn = sqlite3.connect('bobex.db', check_same_thread=False)
