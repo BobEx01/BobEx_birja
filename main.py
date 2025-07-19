@@ -58,9 +58,10 @@ app.add_handler(CommandHandler('paket_ol', paketlar.paket_ol))
 app.add_handler(CommandHandler('vip_paket_ol', paketlar.vip_paket_ol))
 app.add_handler(CommandHandler('paket_stat', paketlar.paket_stat))
 
-# --- PREMIUM/VIP ---
+# --- PREMIUM/VIP/SUPER ---
 app.add_handler(CommandHandler('premium', premium_vip.premium_elon))
-app.add_handler(CommandHandler('vip', premium_vip.vip_aktiv))
+app.add_handler(CommandHandler('vip_aktiv', premium_vip.vip_aktiv))
+app.add_handler(CommandHandler('super_aktiv', premium_vip.super_aktiv))
 
 # --- YUK ELON ---
 yuk_elon_conv = ConversationHandler(
@@ -97,6 +98,7 @@ app.add_handler(shofyor_elon_conv)
 # --- E'LON KO‘RISH ---
 app.add_handler(MessageHandler(filters.Regex("^📦 Yuk e'lonlarini ko‘rish$"), yuk_korish.yuk_korish))
 app.add_handler(MessageHandler(filters.Regex("^🚚 Shofyor e'lonlarini ko‘rish$"), shofyor_korish.shofyor_korish))
+
 app.add_handler(CallbackQueryHandler(yuk_korish.tumanlar_korish, pattern='^viloyat_'))
 app.add_handler(CallbackQueryHandler(yuk_korish.elonlar_korish, pattern='^tuman_'))
 app.add_handler(CallbackQueryHandler(yuk_korish.orqaga_viloyatlar, pattern='^orqaga_viloyatlar$'))
@@ -111,12 +113,11 @@ app.add_handler(CallbackQueryHandler(shofyor_korish.asosiy_menyu_handler, patter
 # --- RAQAM OLISH CALLBACK ---
 app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
 
-# --- PREMIUM qilish CALLBACK ---
-app.add_handler(CallbackQueryHandler(premium_vip.premium_elon_callback, pattern='^premium_elon_'))
-app.add_handler(CallbackQueryHandler(yuk_elon.premium_qilish_callback, pattern='^premium_'))
+# --- VIP/SUPER E'LON UCHUN CALLBACKLAR ---
+app.add_handler(CallbackQueryHandler(premium_vip.vip_aktiv_callback, pattern='^vip_elon_'))
+app.add_handler(CallbackQueryHandler(premium_vip.super_aktiv_callback, pattern='^super_elon_'))
 
 # --- SHOFYOR uchun PREMIUM, UZAYTIRISH, O‘CHIRISH ---
-app.add_handler(CallbackQueryHandler(shofyor_elon.premium_qilish_callback, pattern='^premium_shofyor_'))
 app.add_handler(CallbackQueryHandler(shofyor_elon.uzaytirish_callback, pattern='^uzaytir_shofyor_'))
 app.add_handler(CallbackQueryHandler(shofyor_elon.ochirish_callback, pattern='^ochir_shofyor_'))
 
