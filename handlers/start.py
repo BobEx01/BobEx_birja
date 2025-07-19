@@ -1,6 +1,7 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
-from database import cursor, conn
+from database import cursor, conn, foydalanuvchilar_soni  # foydalanuvchilar_soni ni ham chaqirdik
+from config import ADMIN_ID
 
 BONUS_MIQDORI = 2000  # Referal orqali bonus miqdori
 
@@ -13,7 +14,8 @@ def asosiy_menu():
         ["📊 Mening hisobim", "Hisobni to‘ldirish"],
         ["🎁 Paketlar", "🗂 E'lonlarim"],
         ["💸 Pul ishlash"],
-        ["📣 Admin xabar"]
+        ["📣 Admin xabar"],
+        ["📊 Foydalanuvchilar soni"] if ADMIN_ID else []  # faqat admin ko‘rsin
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
@@ -37,11 +39,11 @@ async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = user.id
     username = user.username or ""
 
-    # Foydalanuvchini bazaga qo‘shish (agar hali qo‘shilmagan bo‘lsa)
+    # Foydalanuvchini bazaga qo‘shish
     cursor.execute("INSERT OR IGNORE INTO foydalanuvchilar (user_id, username) VALUES (?, ?)", (user_id, username))
     conn.commit()
 
-    # Agar /start linkida referal ID bo‘lsa
+    # Referal ID ni tekshirish
     if context.args:
         referal_id = context.args[0]
         if referal_id != str(user_id):
@@ -67,3 +69,12 @@ async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📣 Admin xabar — admin bilan bog‘lanish",
         reply_markup=asosiy_menu()
     )
+
+
+# === Foydalanuvchilar sonini ko‘rsatish komandasi ===
+async def foydalanuvchilar_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.from_user.id == ADMIN_ID:
+        soni = foydalanuvchilar_soni()
+        await update.message.reply_text(f"📊 Umumiy foydalanuvchilar soni: {soni}")
+    else:
+        await update.message.reply_text("❌ Siz admin emassiz.")
