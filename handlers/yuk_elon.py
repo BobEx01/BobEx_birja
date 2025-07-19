@@ -86,7 +86,7 @@ async def narx_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         context.user_data['narx'] = int(update.message.text)
     except ValueError:
-        await update.message.reply_text("❗️ Iltimos, to‘lovni faqat raqam bilan kiriting!", reply_markup=back_button())
+        await update.message.reply_text("❗️ Iltimos, faqat raqam kiriting!", reply_markup=back_button())
         return "narx"
 
     await update.message.reply_text("📞 Telefon raqamingizni kiriting:", reply_markup=back_button())
@@ -99,13 +99,11 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data['telefon'] = update.message.text
     user_id = update.message.from_user.id
-    context.user_data['user_id'] = user_id
     sanasi = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    context.user_data['sanasi'] = sanasi
+    muddat = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
 
-    cursor.execute('''INSERT INTO yuk_elonlar
-        (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, premium)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+    cursor.execute('''INSERT INTO yuk_elonlar (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
     ''', (
         user_id,
         context.user_data['viloyat'],
@@ -116,16 +114,24 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['mashina'],
         context.user_data['narx'],
         context.user_data['telefon'],
-        sanasi
+        sanasi,
+        muddat
     ))
     conn.commit()
 
     await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
-    # Bonus va promo taklif qilish
-    from handlers.bonus_va_promo import elon_bonus_taklif
-    await elon_bonus_taklif(update, context)
+    await update.message.reply_text(
+        "❗️ E’loningizni yanada ko‘proq odam ko‘rishini xohlaysizmi?\n\n"
+        f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m\n"
+        f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m\n",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔸 VIP e’lon qilish", callback_data=f"vip_yuk_{user_id}|{sanasi}")],
+            [InlineKeyboardButton("🌟 Super e’lon qilish", callback_data=f"super_yuk_{user_id}|{sanasi}")]
+        ])
+    )
 
+    asyncio.create_task(elon_muddat_tugashi(user_id, sanasi, context))
     await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
 
@@ -140,16 +146,42 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
             [InlineKeyboardButton("✅ Uzaytirish", callback_data=f"uzaytir_{user_id}_{sanasi}")],
             [InlineKeyboardButton("❌ O‘chirish", callback_data=f"ochir_{user_id}_{sanasi}")]
         ])
-        await context.bot.send_message(
-            chat_id=user_id,
-            text="⏳ E'loningiz muddati tugadi. Uzaytirasizmi?",
-            reply_markup=keyboard
-        )
+        await context.bot.send_message(chat_id=user_id, text="⏳ E'loningiz muddati tugadi. Uzaytirasizmi?", reply_markup=keyboard)
 
-        await asyncio.sleep(8 * 60 * 60)
-        cursor.execute("SELECT * FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
-        check = cursor.fetchone()
-        if check:
-            cursor.execute("DELETE FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
-            conn.commit()
-            await context.bot.send_message(chat_id=user_id, text="❌ E'loningiz o‘chirildi.")
+
+async def vip_super_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data.split('_')
+    tur = data[0]  # vip yoki super
+    user_id, sanasi = data[2].split('|')
+    user_id = int(user_id)
+
+    cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id=?", (user_id,))
+    natija = cursor.fetchone()
+
+    if not natija:
+        await query.edit_message_text("❌ Balansingiz topilmadi.")
+        return
+
+    balans = natija[0]
+    narx = VIP_ELON_NARX if tur == 'vip' else SUPER_ELON_NARX
+
+    if balans < narx:
+        await query.edit_message_text("❌ Balansingiz yetarli emas.")
+        return
+
+    cursor.execute('''
+        UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ? WHERE user_id=?
+    ''', (narx, narx, user_id))
+
+    cursor.execute('''
+        UPDATE yuk_elonlar SET premium = ? WHERE user_id=? AND sanasi=?
+    ''', (1 if tur == 'vip' else 2, user_id, sanasi))
+    conn.commit()
+
+    await query.edit_message_text(f"✅ E’loningiz {'VIP' if tur == 'vip' else 'Super'} holatga o‘tkazildi!")
+
+
+# Yangi callbacklarni dispatcherga qo‘shish esdan chiqmasin
