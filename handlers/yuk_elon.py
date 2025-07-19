@@ -182,6 +182,3 @@ async def vip_super_aktiv_callback(update: Update, context: ContextTypes.DEFAULT
     conn.commit()
 
     await query.edit_message_text(f"✅ E’loningiz {'VIP' if tur == 'vip' else 'Super'} holatga o‘tkazildi!")
-
-
-# Yangi callbacklarni dispatcherga qo‘shish esdan chiqmasin
