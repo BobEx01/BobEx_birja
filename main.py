@@ -22,7 +22,8 @@ from handlers import (
     raqam_olish,
     admin_xabar,
     elonlarim,
-    pul_ishlash
+    pul_ishlash,
+    bonus_va_promo
 )
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -61,6 +62,9 @@ app.add_handler(CommandHandler('paket_stat', paketlar.paket_stat))
 # --- VIP/SUPER E'LON ---
 app.add_handler(CommandHandler('vip_aktiv', vip_super_xizmat.vip_aktiv))
 app.add_handler(CommandHandler('super_aktiv', vip_super_xizmat.super_aktiv))
+
+# --- BONUS VA PROMO TAKLIF ---
+app.add_handler(CommandHandler('elon_bonus', bonus_va_promo.elon_bonus_taklif))
 
 # --- YUK ELON ---
 yuk_elon_conv = ConversationHandler(
