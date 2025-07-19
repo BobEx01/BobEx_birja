@@ -84,7 +84,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['user_id'] = update.message.from_user.id
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Foydalanuvchini bazaga qo‘shish
+    # Foydalanuvchini foydalanuvchilar jadvaliga qo‘shish
     cursor.execute('''
         INSERT OR IGNORE INTO foydalanuvchilar (user_id, balans, sarflangan)
         VALUES (?, 0, 0)
@@ -124,7 +124,7 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     query = update.callback_query
     await query.answer()
 
-    data = query.data[len('premium_shofyor_'):]
+    data = query.data.replace('premium_shofyor_', '')
     if '|' not in data:
         await query.edit_message_text("❌ Ma'lumotni o‘qishda xato.")
         return
@@ -140,7 +140,7 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     result = cursor.fetchone()
 
     if not result:
-        await query.edit_message_text("❌ Foydalanuvchi topilmadi yoki balans mavjud emas.")
+        await query.edit_message_text("❌ Balansingiz yetarli emas yoki topilmadi. Avval balansni to‘ldiring.")
         return
 
     balans = result[0]
@@ -164,7 +164,7 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
 
 
 async def elon_muddat_tugashi(user_id, sanasi, context):
-    await asyncio.sleep(24 * 60 * 60)
+    await asyncio.sleep(24 * 60 * 60)  # 24 soat kutadi
 
     cursor.execute("SELECT * FROM shofyor_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
     elon = cursor.fetchone()
