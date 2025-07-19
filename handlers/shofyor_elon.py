@@ -1,6 +1,6 @@
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
-from database import cursor, conn
+from database import cursor, conn, foydalanuvchi_mavjudmi
 from config import PREMIUM_ELON_NARX, ADMIN_ID
 from handlers.start import asosiy_menu
 import datetime
@@ -80,23 +80,21 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
         return await narx_qabul(update, context)
 
+    user_id = update.message.from_user.id
     context.user_data['telefon'] = update.message.text
-    context.user_data['user_id'] = update.message.from_user.id
+    context.user_data['user_id'] = user_id
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Foydalanuvchini foydalanuvchilar jadvaliga qo‘shish
-    cursor.execute('''
-        INSERT OR IGNORE INTO foydalanuvchilar (user_id, balans, sarflangan)
-        VALUES (?, 0, 0)
-    ''', (context.user_data['user_id'],))
-    conn.commit()
+    if not foydalanuvchi_mavjudmi(user_id):
+        cursor.execute("INSERT INTO foydalanuvchilar (user_id, balans, sarflangan) VALUES (?, 0, 0)", (user_id,))
+        conn.commit()
 
     cursor.execute('''
         INSERT INTO shofyor_elonlar
         (user_id, viloyat, tuman, mashina, sigim, narx, telefon, sanasi, premium)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
     ''', (
-        context.user_data['user_id'],
+        user_id,
         context.user_data['viloyat'],
         context.user_data['tuman'],
         context.user_data['mashina'],
@@ -111,11 +109,11 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\nPremium e’loningiz doimo yuqorida chiqadi.",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("💎 Premium qilish (10,000 so‘m)", callback_data=f"premium_shofyor_{context.user_data['user_id']}|{context.user_data['sanasi']}")]
+            [InlineKeyboardButton("💎 Premium qilish (10,000 so‘m)", callback_data=f"premium_shofyor_{user_id}|{context.user_data['sanasi']}")]
         ])
     )
 
-    asyncio.create_task(elon_muddat_tugashi(context.user_data['user_id'], context.user_data['sanasi'], context))
+    asyncio.create_task(elon_muddat_tugashi(user_id, context.user_data['sanasi'], context))
     await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
 
@@ -164,7 +162,7 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
 
 
 async def elon_muddat_tugashi(user_id, sanasi, context):
-    await asyncio.sleep(24 * 60 * 60)  # 24 soat kutadi
+    await asyncio.sleep(24 * 60 * 60)
 
     cursor.execute("SELECT * FROM shofyor_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
     elon = cursor.fetchone()
