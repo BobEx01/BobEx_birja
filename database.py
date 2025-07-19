@@ -25,7 +25,6 @@ if 'referal_id' not in ustunlar:
     cursor.execute('ALTER TABLE foydalanuvchilar ADD COLUMN referal_id INTEGER DEFAULT 0')
     conn.commit()
 
-
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS yuk_elonlar (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,7 +88,6 @@ CREATE TABLE IF NOT EXISTS tolov_log (
 
 conn.commit()
 
-
 # === Funksiyalar ===
 
 def foydalanuvchi_qoshish(user_id: int, username: str):
@@ -137,9 +135,7 @@ def tolov_log_qoshish(user_id: int, summa: int, sana: str, izoh: str):
     ''', (user_id, summa, sana, izoh))
     conn.commit()
 
-
-# === YANGI: FOYDALANUVCHILAR SONI FUNKSIYASI ===
-
+# === FOYDALANUVCHILAR SONI FUNKSIYASI ===
 def foydalanuvchilar_soni():
     cursor.execute("SELECT COUNT(*) FROM foydalanuvchilar")
     natija = cursor.fetchone()return natija[0] if natija else 0
