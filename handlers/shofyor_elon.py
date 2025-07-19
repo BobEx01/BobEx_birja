@@ -139,17 +139,25 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id=?', (user_id,))
     result = cursor.fetchone()
 
-    if not result or result[0] < PREMIUM_ELON_NARX:
-        await query.edit_message_text("❌ Balansingiz yetarli emas yoki topilmadi. Avval balansni to‘ldiring.")
+    if not result:
+        await query.edit_message_text("❌ Balansingiz topilmadi. Avval balansni to‘ldiring.")
+        return
+
+    balans = result[0]
+    if balans < PREMIUM_ELON_NARX:
+        await query.edit_message_text("❌ Balansingiz yetarli emas. Premium uchun balansni to‘ldiring.")
         return
 
     cursor.execute('''
-        UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ?
+        UPDATE foydalanuvchilar
+        SET balans = balans - ?, sarflangan = sarflangan + ?
         WHERE user_id=?
     ''', (PREMIUM_ELON_NARX, PREMIUM_ELON_NARX, user_id))
 
     cursor.execute('''
-        UPDATE shofyor_elonlar SET premium=1 WHERE user_id=? AND sanasi=?
+        UPDATE shofyor_elonlar
+        SET premium=1
+        WHERE user_id=? AND sanasi=?
     ''', (user_id, sanasi))
 
     conn.commit()
