@@ -4,7 +4,7 @@ import datetime
 import asyncio
 from database import cursor, conn
 from handlers.start import asosiy_menu
-from config import PREMIUM_ELON_NARX
+from config import VIP_ELON_NARX, SUPER_ELON_NARX
 
 
 def viloyatlar_keyboard():
@@ -98,15 +98,16 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await narx_qabul(update, context)
 
     context.user_data['telefon'] = update.message.text
-    context.user_data['user_id'] = update.message.from_user.id
-    context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    context.user_data['muddat'] = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+    user_id = update.message.from_user.id
+    context.user_data['user_id'] = user_id
+    sanasi = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    context.user_data['sanasi'] = sanasi
 
-    cursor.execute('''
-        INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    cursor.execute('''INSERT INTO yuk_elonlar
+        (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, premium)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
     ''', (
-        context.user_data['user_id'],
+        user_id,
         context.user_data['viloyat'],
         context.user_data['tuman'],
         context.user_data['qayerdan'],
@@ -115,55 +116,18 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['mashina'],
         context.user_data['narx'],
         context.user_data['telefon'],
-        context.user_data['sanasi'],
-        context.user_data['muddat'],
-        0
+        sanasi
     ))
     conn.commit()
 
     await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
-    await update.message.reply_text(
-        "❗️ Premium e’lon qilishni xohlaysizmi? To‘lov 10,000 so‘m.\n"
-        "Premium e’loningiz doimo yuqorida ko‘rsatiladi.",
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("💎 Premium qilish (10,000 so‘m)", callback_data=f"premium_{context.user_data['user_id']}_{context.user_data['sanasi']}")]
-        ])
-    )
-
-    asyncio.create_task(elon_muddat_tugashi(context.user_data['user_id'], context.user_data['sanasi'], context))
+    # Bonus va promo taklif qilish
+    from handlers.bonus_va_promo import elon_bonus_taklif
+    await elon_bonus_taklif(update, context)
 
     await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
-
-
-async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    data = query.data.split('_')
-    user_id, sanasi = data[1], data[2]
-
-    # Balans tekshirish
-    cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id = ?", (user_id,))
-    result = cursor.fetchone()
-
-    if not result or result[0] < PREMIUM_ELON_NARX:
-        await query.edit_message_text("❌ Balansingiz yetarli emas yoki topilmadi. Avval balansni to‘ldiring.")
-        return
-
-    # Balansdan pul yechish
-    cursor.execute('''
-        UPDATE foydalanuvchilar
-        SET balans = balans - ?, sarflangan = sarflangan + ?
-        WHERE user_id = ?
-    ''', (PREMIUM_ELON_NARX, PREMIUM_ELON_NARX, user_id))
-
-    # E'lonni Premium qilish
-    cursor.execute('UPDATE yuk_elonlar SET premium=1 WHERE user_id=? AND sanasi=?', (user_id, sanasi))
-    conn.commit()
-
-    await query.edit_message_text("✅ E’loningiz endi Premium holatga o‘tkazildi. Rahmat!")
 
 
 async def elon_muddat_tugashi(user_id, sanasi, context):
