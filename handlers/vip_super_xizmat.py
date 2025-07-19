@@ -1,23 +1,62 @@
 from telegram import Update
 from telegram.ext import ContextTypes
+from database import balans_olish, balans_oshirish, cursor, conn
+from config import VIP_ELON_NARX, SUPER_ELON_NARX, ADMIN_ID
 
-async def premium_va_promo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = (
-        "🔰 E’loningizni yanada samarali qilishni xohlaysizmi?\n\n"
-        "📌 Hozirda barcha e’lonlar <b>Tezkor e’lon</b> sifatida <b>BEPUL</b> joylanadi.\n\n"
-        "Agar e’loningizni ko‘proq odamlar ko‘rishini istasangiz, quyidagilarni tanlang:\n\n"
-        "⭐️ <b>VIP e’lon — 45,000 so‘m</b>\n"
-        "• E’lon yonida <b>VIP</b> belgisi.\n"
-        "• Kategoriya va viloyat bo‘limlarida doimo yuqorida turadi.\n"
-        "• Ko‘rinishlar soni oddiy e’londan <b>5 barobar ko‘p</b>.\n"
-        "• BONUS: <b>1 ta telefon raqamni bepul olish</b>.\n\n"
-        "🌟 <b>Super e’lon — 90,000 so‘m</b>\n"
-        "• E’lon yonida <b>SUPER</b> belgisi.\n"
-        "• E’loningiz maxsus <b>Tavsiya qilingan e’lonlar</b> bo‘limida chiqadi.\n"
-        "• Ko‘rinishlar soni oddiy e’londan <b>10 barobar ko‘p</b>.\n"
-        "• BONUS: <b>3 ta telefon raqamni bepul olish</b>.\n\n"
-        "💳 Tanlagan variantingiz uchun quyidagi komandalarni bosing:\n\n"
-        "👉 /vip_aktiv — VIP e’lon qilish\n"
-        "👉 /super_aktiv — Super e’lon qilish\n"
-    )
-    await update.message.reply_text(text, parse_mode='HTML')
+
+async def vip_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    balans = balans_olish(user_id)
+
+    if balans < VIP_ELON_NARX:
+        await update.message.reply_text(f"❌ Balansingiz yetarli emas. VIP e’lon uchun {VIP_ELON_NARX} so‘m kerak.")
+        return
+
+    cursor.execute("""
+        UPDATE foydalanuvchilar
+        SET balans = balans - ?, sarflangan = sarflangan + ?
+        WHERE user_id = ?
+    """, (VIP_ELON_NARX, VIP_ELON_NARX, user_id))
+    conn.commit()
+
+    # VIP belgisi va bonus
+    cursor.execute("""
+        UPDATE shofyor_elonlar
+        SET premium = 2
+        WHERE user_id = ? ORDER BY sanasi DESC LIMIT 1
+    """, (user_id,))
+    conn.commit()
+
+    balans_oshirish(user_id, 0)  # balansni yangilash uchun
+
+    await update.message.reply_text("✅ E’loningiz VIP holatga o‘tkazildi! 1 ta telefon raqamni bepul olishingiz mumkin.")
+    await context.bot.send_message(ADMIN_ID, f"📢 Foydalanuvchi {user_id} VIP e’lon sotib oldi.")
+
+
+async def super_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    balans = balans_olish(user_id)
+
+    if balans < SUPER_ELON_NARX:
+        await update.message.reply_text(f"❌ Balansingiz yetarli emas. Super e’lon uchun {SUPER_ELON_NARX} so‘m kerak.")
+        return
+
+    cursor.execute("""
+        UPDATE foydalanuvchilar
+        SET balans = balans - ?, sarflangan = sarflangan + ?
+        WHERE user_id = ?
+    """, (SUPER_ELON_NARX, SUPER_ELON_NARX, user_id))
+    conn.commit()
+
+    # SUPER belgisi va bonus
+    cursor.execute("""
+        UPDATE shofyor_elonlar
+        SET premium = 3
+        WHERE user_id = ? ORDER BY sanasi DESC LIMIT 1
+    """, (user_id,))
+    conn.commit()
+
+    balans_oshirish(user_id, 0)  # balansni yangilash uchun
+
+    await update.message.reply_text("✅ E’loningiz Super holatga o‘tkazildi! 3 ta telefon raqamni bepul olishingiz mumkin.")
+    await context.bot.send_message(ADMIN_ID, f"📢 Foydalanuvchi {user_id} Super e’lon sotib oldi.")
