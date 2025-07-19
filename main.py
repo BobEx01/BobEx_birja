@@ -33,6 +33,10 @@ app = Application.builder().token(TOKEN).build()
 app.add_handler(CommandHandler('start', start.boshlash))
 app.add_handler(CommandHandler('boshlash', start.boshlash))
 
+# ✅ Foydalanuvchilar soni komandasi
+app.add_handler(CommandHandler('foydalanuvchilar', start.foydalanuvchilar_cmd))
+app.add_handler(MessageHandler(filters.Regex("^📊 Foydalanuvchilar soni$"), start.foydalanuvchilar_cmd))
+
 # --- MENING HISOBIM ---
 app.add_handler(MessageHandler(filters.Regex("^📊 Mening hisobim$"), hisobim.hisobim_handler))
 
