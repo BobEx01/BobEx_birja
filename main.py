@@ -58,8 +58,7 @@ app.add_handler(CommandHandler('paket_ol', paketlar.paket_ol))
 app.add_handler(CommandHandler('vip_paket_ol', paketlar.vip_paket_ol))
 app.add_handler(CommandHandler('paket_stat', paketlar.paket_stat))
 
-# --- PREMIUM/VIP/SUPER ---
-app.add_handler(CommandHandler('premium', premium_vip.premium_elon))
+# --- VIP/SUPER E'LON ---
 app.add_handler(CommandHandler('vip_aktiv', premium_vip.vip_aktiv))
 app.add_handler(CommandHandler('super_aktiv', premium_vip.super_aktiv))
 
@@ -113,11 +112,11 @@ app.add_handler(CallbackQueryHandler(shofyor_korish.asosiy_menyu_handler, patter
 # --- RAQAM OLISH CALLBACK ---
 app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
 
-# --- VIP/SUPER E'LON UCHUN CALLBACKLAR ---
+# --- VIP/SUPER E'LON CALLBACKLAR ---
 app.add_handler(CallbackQueryHandler(premium_vip.vip_aktiv_callback, pattern='^vip_elon_'))
 app.add_handler(CallbackQueryHandler(premium_vip.super_aktiv_callback, pattern='^super_elon_'))
 
-# --- SHOFYOR uchun PREMIUM, UZAYTIRISH, O‘CHIRISH ---
+# --- SHOFYOR uchun UZAYTIRISH, O‘CHIRISH ---
 app.add_handler(CallbackQueryHandler(shofyor_elon.uzaytirish_callback, pattern='^uzaytir_shofyor_'))
 app.add_handler(CallbackQueryHandler(shofyor_elon.ochirish_callback, pattern='^ochir_shofyor_'))
 
