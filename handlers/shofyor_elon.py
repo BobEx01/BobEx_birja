@@ -84,6 +84,13 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['user_id'] = update.message.from_user.id
     context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # Foydalanuvchini bazaga qo‘shish
+    cursor.execute('''
+        INSERT OR IGNORE INTO foydalanuvchilar (user_id, balans, sarflangan)
+        VALUES (?, 0, 0)
+    ''', (context.user_data['user_id'],))
+    conn.commit()
+
     cursor.execute('''
         INSERT INTO shofyor_elonlar
         (user_id, viloyat, tuman, mashina, sigim, narx, telefon, sanasi, premium)
@@ -133,7 +140,7 @@ async def premium_qilish_callback(update: Update, context: ContextTypes.DEFAULT_
     result = cursor.fetchone()
 
     if not result:
-        await query.edit_message_text("❌ Foydalanuvchi topilmadi.")
+        await query.edit_message_text("❌ Foydalanuvchi topilmadi yoki balans mavjud emas.")
         return
 
     balans = result[0]
