@@ -1,9 +1,8 @@
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 from database import cursor, conn, foydalanuvchi_mavjudmi
-from config import PREMIUM_ELON_NARX, ADMIN_ID
+from config import VIP_ELON_NARX, SUPER_ELON_NARX, ADMIN_ID
 from handlers.start import asosiy_menu
-from handlers.bonus_va_promo import elon_bonus_taklif
 import datetime
 import asyncio
 
@@ -41,22 +40,13 @@ async def tuman_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await shofyor_elon_start(update, context)
 
     context.user_data['tuman'] = update.message.text
-    await update.message.reply_text("🧍 Ismingizni kiriting:", reply_markup=back_button())
-    return "ism"
-
-
-async def ism_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.text == "⬅️ Orqaga":
-        return await tuman_qabul(update, context)
-
-    context.user_data['ism'] = update.message.text
     await update.message.reply_text("🚗 Qanday mashinangiz bor?", reply_markup=back_button())
     return "mashina"
 
 
 async def mashina_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "⬅️ Orqaga":
-        return await ism_qabul(update, context)
+        return await tuman_qabul(update, context)
 
     context.user_data['mashina'] = update.message.text
     await update.message.reply_text("⚖️ Mashina sig‘imini kiriting (kg yoki tonna):", reply_markup=back_button())
@@ -101,12 +91,12 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     cursor.execute('''
         INSERT INTO shofyor_elonlar
-        (user_id, viloyat, tuman, ism, mashina, sigim, narx, telefon, sanasi, premium)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+        (user_id, viloyat, tuman, mashina, sigim, narx, telefon, sanasi, premium)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
     ''', (
         user_id,
         context.user_data['viloyat'],
         context.user_data['tuman'],
-        context.user_data['ism'],
         context.user_data['mashina'],
         context.user_data['sigim'],
         context.user_data['narx'],
@@ -117,8 +107,14 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("✅ Shofyor e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
-    # Bonus va VIP/Super elon taklifini chiqarish
-    await elon_bonus_taklif(update, context)
+    # VIP va SUPER taklif qilish
+    await update.message.reply_text(
+        "🔝 E’loningizni yanada samarali qilishni xohlaysizmi?\nQuyidagilardan birini tanlang:",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton(f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m", callback_data=f"vip_shofyor_{user_id}|{context.user_data['sanasi']}")],
+            [InlineKeyboardButton(f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m", callback_data=f"super_shofyor_{user_id}|{context.user_data['sanasi']}")]
+        ])
+    )
 
     asyncio.create_task(elon_muddat_tugashi(user_id, context.user_data['sanasi'], context))
 
@@ -126,8 +122,53 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return -1
 
 
+async def vip_shofyor_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await elon_upgrade_callback(update, context, 'VIP', VIP_ELON_NARX, bonus=1)
+
+
+async def super_shofyor_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await elon_upgrade_callback(update, context, 'SUPER', SUPER_ELON_NARX, bonus=3)
+
+
+async def elon_upgrade_callback(update: Update, context: ContextTypes.DEFAULT_TYPE, tur, narx, bonus):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data.split('_')[-1]
+    user_id_str, sanasi = data.split('|', 1)
+    user_id = int(user_id_str)
+
+    cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id=?', (user_id,))
+    result = cursor.fetchone()
+    if not result:
+        await query.edit_message_text("❌ Balansingiz topilmadi. Avval balansni to‘ldiring.")
+        return
+
+    balans = result[0]
+    if balans < narx:
+        await query.edit_message_text("❌ Balansingiz yetarli emas. Iltimos, balansingizni to‘ldiring.")
+        return
+
+    cursor.execute('''
+        UPDATE foydalanuvchilar
+        SET balans = balans - ?, sarflangan = sarflangan + ?
+        WHERE user_id=?
+    ''', (narx, narx, user_id))
+
+    cursor.execute('''
+        UPDATE shofyor_elonlar
+        SET premium = 1
+        WHERE user_id=? AND sanasi=?
+    ''', (user_id, sanasi))
+
+    conn.commit()
+
+    await query.edit_message_text(f"✅ E’loningiz {tur} holatga ko‘tarildi.\nBonus: {bonus} ta telefon raqam bepul olish huquqi berildi!")
+    await context.bot.send_message(ADMIN_ID, f"📢 User {user_id} shofyor e’loni uchun {tur} sotib oldi.")
+
+# E'lon muddati tugashi
 async def elon_muddat_tugashi(user_id, sanasi, context):
-    await asyncio.sleep(24 * 60 * 60)  # 24 soat
+    await asyncio.sleep(24 * 60 * 60)  # 24 soat kutish
 
     cursor.execute("SELECT * FROM shofyor_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
     elon = cursor.fetchone()
