@@ -2,9 +2,11 @@ from database import cursor, conn
 from config import VIP_ELON_NARX, SUPER_ELON_NARX, ADMIN_ID
 from handlers.start import asosiy_menu
 import datetime
+from telegram import Update
+from telegram.ext import ContextTypes
 
 
-async def vip_elon_qilish(update, context):
+async def vip_elon_qilish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
@@ -18,7 +20,7 @@ async def vip_elon_qilish(update, context):
     if balans < VIP_ELON_NARX:
         await update.message.reply_text(
             f"❌ Balansingiz yetarli emas. VIP e’lon uchun {VIP_ELON_NARX} so‘m kerak.\n"
-            "💳 Balansni to‘ldiring: /hisobim"
+            "💳 Balansni to‘ldirish uchun /hisobim ni bosing."
         )
         return
 
@@ -40,7 +42,7 @@ async def vip_elon_qilish(update, context):
     )
 
 
-async def super_elon_qilish(update, context):
+async def super_elon_qilish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
@@ -54,7 +56,7 @@ async def super_elon_qilish(update, context):
     if balans < SUPER_ELON_NARX:
         await update.message.reply_text(
             f"❌ Balansingiz yetarli emas. Super e’lon uchun {SUPER_ELON_NARX} so‘m kerak.\n"
-            "💳 Balansni to‘ldiring: /hisobim"
+            "💳 Balansni to‘ldirish uchun /hisobim ni bosing."
         )
         return
 
@@ -76,7 +78,7 @@ async def super_elon_qilish(update, context):
     )
 
 
-async def elon_bonus_taklif(update, context):
+async def elon_bonus_taklif(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "✅ Sizning e'loningiz <b>Tezkor e'lon</b> sifatida <b>bepul</b> joylandi.\n\n"
         "Agar e'loningizni ko‘proq odamlar ko‘rishini xohlasangiz va <b>telefon raqamlarni bepul olish bonusiga</b> ega bo‘lishni istasangiz, quyidagilarni tanlang:\n\n"
