@@ -6,7 +6,6 @@ ADMIN_USERNAME = '@bobex_uz'
 
 RAQAM_NARX = 28000
 VIP_NARX = 1000000
-# Premium o‘rniga VIP va Super e’lonlar narxlari
 VIP_ELON_NARX = 45000      # VIP e’lon uchun narx
 SUPER_ELON_NARX = 90000    # Super e’lon uchun narx
 
