@@ -139,3 +139,4 @@ def tolov_log_qoshish(user_id: int, summa: int, sana: str, izoh: str):
 def foydalanuvchilar_soni():
     cursor.execute("SELECT COUNT(*) FROM foydalanuvchilar")
     natija = cursor.fetchone()
+    return natija[0] if natija else 0
