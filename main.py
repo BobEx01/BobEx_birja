@@ -60,6 +60,8 @@ app.add_handler(CommandHandler('vip_paket_ol', paketlar.vip_paket_ol))
 app.add_handler(CommandHandler('paket_stat', paketlar.paket_stat))
 
 # --- VIP/SUPER E'LON ---
+app.add_handler(CommandHandler('vip_elon', vip_super_xizmat.vip_elon))
+app.add_handler(CommandHandler('super_elon', vip_super_xizmat.super_elon))
 app.add_handler(CommandHandler('vip_aktiv', vip_super_xizmat.vip_aktiv))
 app.add_handler(CommandHandler('super_aktiv', vip_super_xizmat.super_aktiv))
 
@@ -90,8 +92,7 @@ shofyor_elon_conv = ConversationHandler(
         "viloyat": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.viloyat_qabul)],
         "tuman": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.tuman_qabul)],
         "mashina": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.mashina_qabul)],
-        "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],
-        "narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
+        "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],"narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
         "telefon": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.telefon_qabul)],
     },
     fallbacks=[]
@@ -119,6 +120,26 @@ app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^
 # --- VIP/SUPER E'LON CALLBACKLAR ---
 app.add_handler(CallbackQueryHandler(vip_super_xizmat.vip_aktiv_callback, pattern='^vip_elon_'))
 app.add_handler(CallbackQueryHandler(vip_super_xizmat.super_aktiv_callback, pattern='^super_elon_'))
+
+# ✅ VIP va Super E'lon to‘lov tugmalari uchun umumiy Callback
+async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == 'vip_tolov':
+        await query.edit_message_text(
+            "💳 *VIP E'lon uchun to‘lov sahifasi:* https://to'lovlinki/vip\n"
+            "💵 Narx: 45,000 so'm",
+            parse_mode='Markdown'
+        )
+    elif query.data == 'super_tolov':
+        await query.edit_message_text(
+            "💳 *Super E'lon uchun to‘lov sahifasi:* https://to'lovlinki/super\n"
+            "💵 Narx: 90,000 so'm",
+            parse_mode='Markdown'
+        )
+
+app.add_handler(CallbackQueryHandler(handle_vip_super_tolov, pattern='^(vip_tolov|super_tolov)$'))
 
 # --- SHOFYOR uchun UZAYTIRISH, O‘CHIRISH ---
 app.add_handler(CallbackQueryHandler(shofyor_elon.uzaytirish_callback, pattern='^uzaytir_shofyor_'))
