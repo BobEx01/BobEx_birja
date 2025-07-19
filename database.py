@@ -1,3 +1,4 @@
+SCALPING DOMINION, [19.07.2025 22:46]
 import sqlite3
 
 conn = sqlite3.connect('bobex.db', check_same_thread=False)
@@ -138,4 +139,7 @@ def tolov_log_qoshish(user_id: int, summa: int, sana: str, izoh: str):
 # === FOYDALANUVCHILAR SONI FUNKSIYASI ===
 def foydalanuvchilar_soni():
     cursor.execute("SELECT COUNT(*) FROM foydalanuvchilar")
-    natija = cursor.fetchone()return natija[0] if natija else 0
+    natija = cursor.fetchone()
+
+SCALPING DOMINION, [19.07.2025 22:46]
+return natija[0] if natija else 0return natija[0] if natija else 0
