@@ -1,100 +1,56 @@
-from database import cursor, conn
-from config import VIP_ELON_NARX, SUPER_ELON_NARX, ADMIN_ID
-from handlers.start import asosiy_menu
-import datetime
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
+from database import cursor, conn, balans_olish, balans_oshirish
+from config import VIP_ELON_NARX, SUPER_ELON_NARX, ADMIN_ID
 
 
-async def vip_elon_qilish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def vip_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
+    balans = balans_olish(user_id)
 
-    cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
-    result = cursor.fetchone()
-
-    if not result:
-        await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
-        return
-
-    balans = result[0]
     if balans < VIP_ELON_NARX:
-        await update.message.reply_text(
-            f"❌ Balansingiz yetarli emas. VIP e’lon uchun {VIP_ELON_NARX} so‘m kerak.\n"
-            "💳 Balansni to‘ldirish uchun /hisobim ni bosing."
-        )
+        await update.message.reply_text("❌ VIP e’lon uchun balansingiz yetarli emas.")
         return
 
-    cursor.execute(
-        'UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ? WHERE user_id = ?',
-        (VIP_ELON_NARX, VIP_ELON_NARX, user_id)
-    )
+    cursor.execute('''
+        UPDATE foydalanuvchilar
+        SET balans = balans - ?, sarflangan = sarflangan + ?
+        WHERE user_id = ?
+    ''', (VIP_ELON_NARX, VIP_ELON_NARX, user_id))
+
+    cursor.execute('''
+        UPDATE yuk_elonlar
+        SET premium = 2
+        WHERE user_id = ? ORDER BY sanasi DESC LIMIT 1
+    ''', (user_id,))
+
     conn.commit()
 
-    await update.message.reply_text(
-        "✅ VIP e’lon muvaffaqiyatli faollashtirildi!\n"
-        "Endi e’loningiz ro‘yxatda yuqoriroqda chiqadi.\n"
-        "Bonus: 1 ta telefon raqamni bepul olasiz!"
-    )
-
-    await context.bot.send_message(
-        chat_id=ADMIN_ID,
-        text=f"📦 User {user_id} VIP e’lon sotib oldi."
-    )
+    await update.message.reply_text("✅ E’loningiz VIP holatga muvaffaqiyatli o‘tkazildi!")
+    await context.bot.send_message(ADMIN_ID, f"📢 <b>{user_id}</b> VIP e’lon xarid qildi.", parse_mode='HTML')
 
 
-async def super_elon_qilish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def super_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
+    balans = balans_olish(user_id)
 
-    cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
-    result = cursor.fetchone()
-
-    if not result:
-        await update.message.reply_text("❌ Foydalanuvchi topilmadi.")
-        return
-
-    balans = result[0]
     if balans < SUPER_ELON_NARX:
-        await update.message.reply_text(
-            f"❌ Balansingiz yetarli emas. Super e’lon uchun {SUPER_ELON_NARX} so‘m kerak.\n"
-            "💳 Balansni to‘ldirish uchun /hisobim ni bosing."
-        )
+        await update.message.reply_text("❌ Super e’lon uchun balansingiz yetarli emas.")
         return
 
-    cursor.execute(
-        'UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ? WHERE user_id = ?',
-        (SUPER_ELON_NARX, SUPER_ELON_NARX, user_id)
-    )
+    cursor.execute('''
+        UPDATE foydalanuvchilar
+        SET balans = balans - ?, sarflangan = sarflangan + ?
+        WHERE user_id = ?
+    ''', (SUPER_ELON_NARX, SUPER_ELON_NARX, user_id))
+
+    cursor.execute('''
+        UPDATE yuk_elonlar
+        SET premium = 3
+        WHERE user_id = ? ORDER BY sanasi DESC LIMIT 1
+    ''', (user_id,))
+
     conn.commit()
 
-    await update.message.reply_text(
-        "✅ Super e’lon muvaffaqiyatli faollashtirildi!\n"
-        "Endi e’loningiz maxsus tavsiya blokida va har doim yuqorida chiqadi.\n"
-        "Bonus: 3 ta telefon raqamni bepul olasiz!"
-    )
-
-    await context.bot.send_message(
-        chat_id=ADMIN_ID,
-        text=f"📦 User {user_id} Super e’lon sotib oldi."
-    )
-
-
-async def elon_bonus_taklif(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = (
-        "✅ Sizning e'loningiz <b>Tezkor e'lon</b> sifatida <b>bepul</b> joylandi.\n\n"
-        "Agar e'loningizni ko‘proq odamlar ko‘rishini xohlasangiz va <b>telefon raqamlarni bepul olish bonusiga</b> ega bo‘lishni istasangiz, quyidagilarni tanlang:\n\n"
-        f"🔸 <b>VIP e’lon — {VIP_ELON_NARX} so‘m</b>\n"
-        "• E'lon yonida <b>VIP</b> belgisi.\n"
-        "• Viloyat va tuman bo‘limlarida <b>birinchi sahifada</b> chiqadi.\n"
-        "• Ko‘rinishlar soni oddiy e'londan <b>5 barobar ko‘p</b>.\n"
-        "• <b>Bonus:</b> 1 ta telefon raqamni <b>bepul</b> olish.\n\n"
-        f"🌟 <b>Super e’lon — {SUPER_ELON_NARX} so‘m</b>\n"
-        "• E'lon yonida <b>SUPER</b> belgisi.\n"
-        "• Doim yuqori qismda va <b>maxsus tavsiya blokida</b>.\n"
-        "• Ko‘rinishlar soni oddiy e'londan <b>10 barobar ko‘p</b>.\n"
-        "• <b>Bonus:</b> 3 ta telefon raqamni <b>bepul</b> olish.\n\n"
-        "💰 <i>Tezkor, VIP yoki Super e’lon uchun quyidagilardan foydalaning:</i>\n\n"
-        "👉 /vip_aktiv — VIP e’lon qilish\n"
-        "👉 /super_aktiv — Super e’lon qilish"
-    )
-
-    await update.message.reply_text(text, parse_mode='HTML')
+    await update.message.reply_text("✅ E’loningiz Super holatga muvaffaqiyatli o‘tkazildi!")
+    await context.bot.send_message(ADMIN_ID, f"📢 <b>{user_id}</b> Super e’lon xarid qildi.", parse_mode='HTML')
