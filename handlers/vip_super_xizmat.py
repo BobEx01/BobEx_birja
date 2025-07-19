@@ -1,54 +1,41 @@
+# vip_super_xizmat.py
+
 from telegram import Update
 from telegram.ext import ContextTypes
-from database import cursor, conn, balans_olish, balans_oshirish
-from config import VIP_ELON_NARX, SUPER_ELON_NARX, ADMIN_ID
+from database import cursor, conn, balans_olish
+from config import VIP_NARX, SUPER_NARX
+from handlers.start import asosiy_menu
 
+async def vip_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
 
-async def vip_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.from_user.id
+    user_id = query.from_user.id
     balans = balans_olish(user_id)
 
-    if balans < VIP_ELON_NARX:
-        await update.message.reply_text("❌ VIP e’lon uchun balansingiz yetarli emas. Iltimos, avval balansingizni to‘ldiring.")
+    if balans < VIP_NARX:
+        await query.edit_message_text("❌ Balansingiz yetarli emas. VIP uchun balans to‘ldiring.")
         return
 
-    cursor.execute('''
-        UPDATE shofyor_elonlar
-        SET premium = 2
-        WHERE user_id = ? ORDER BY sanasi DESC LIMIT 1
-    ''', (user_id,))
-    cursor.execute('''
-        UPDATE foydalanuvchilar
-        SET balans = balans - ?, sarflangan = sarflangan + ?, paket_soni = paket_soni + 1
-        WHERE user_id = ?
-    ''', (VIP_ELON_NARX, VIP_ELON_NARX, user_id))
-    balans_oshirish(user_id, 1)  # 1 ta raqam olish bonusi qo‘shiladi
+    cursor.execute("UPDATE foydalanuvchilar SET balans = balans - ? WHERE user_id = ?", (VIP_NARX, user_id))
     conn.commit()
 
-    await update.message.reply_text("✅ E’loningiz VIP holatiga o‘tkazildi. 1 ta telefon raqamni bepul olishingiz mumkin.")
-    await context.bot.send_message(ADMIN_ID, f"👤 {user_id} foydalanuvchi VIP e’lon aktiv qildi.")
+    await query.edit_message_text("✅ VIP e’lon holati faollashtirildi!")
+    await context.bot.send_message(user_id, "🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
 
+async def super_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
 
-async def super_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.from_user.id
+    user_id = query.from_user.id
     balans = balans_olish(user_id)
 
-    if balans < SUPER_ELON_NARX:
-        await update.message.reply_text("❌ Super e’lon uchun balansingiz yetarli emas. Iltimos, avval balansingizni to‘ldiring.")
+    if balans < SUPER_NARX:
+        await query.edit_message_text("❌ Balansingiz yetarli emas. Super uchun balans to‘ldiring.")
         return
 
-    cursor.execute('''
-        UPDATE shofyor_elonlar
-        SET premium = 3
-        WHERE user_id = ? ORDER BY sanasi DESC LIMIT 1
-    ''', (user_id,))
-    cursor.execute('''
-        UPDATE foydalanuvchilar
-        SET balans = balans - ?, sarflangan = sarflangan + ?, paket_soni = paket_soni + 3
-        WHERE user_id = ?
-    ''', (SUPER_ELON_NARX, SUPER_ELON_NARX, user_id))
-    balans_oshirish(user_id, 3)  # 3 ta raqam olish bonusi qo‘shiladi
+    cursor.execute("UPDATE foydalanuvchilar SET balans = balans - ? WHERE user_id = ?", (SUPER_NARX, user_id))
     conn.commit()
 
-    await update.message.reply_text("✅ E’loningiz SUPER holatga o‘tkazildi. 3 ta telefon raqamni bepul olishingiz mumkin.")
-    await context.bot.send_message(ADMIN_ID, f"👤 {user_id} foydalanuvchi SUPER e’lon aktiv qildi.")
+    await query.edit_message_text("✅ Super e’lon holati faollashtirildi!")
+    await context.bot.send_message(user_id, "🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
