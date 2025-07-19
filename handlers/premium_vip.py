@@ -1,10 +1,10 @@
 from database import cursor, conn
-from config import PREMIUM_ELON_NARX, VIP_NARX, ADMIN_ID
+from config import VIP_ELON_NARX, SUPER_ELON_NARX, ADMIN_ID
 from handlers.start import asosiy_menu
 import datetime
 
 
-async def premium_elon(update, context):
+async def vip_elon_qilish(update, context):
     user_id = update.message.from_user.id
 
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
@@ -15,86 +15,31 @@ async def premium_elon(update, context):
         return
 
     balans = result[0]
-    if balans < PREMIUM_ELON_NARX:
+    if balans < VIP_ELON_NARX:
         await update.message.reply_text(
-            f"❌ Balansingiz yetarli emas. Premium e’lon uchun {PREMIUM_ELON_NARX} so‘m kerak.\n"
+            f"❌ Balansingiz yetarli emas. VIP e’lon uchun {VIP_ELON_NARX} so‘m kerak.\n"
             "💳 Balansni to‘ldiring: /hisobim"
         )
         return
 
     cursor.execute(
         'UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ? WHERE user_id = ?',
-        (PREMIUM_ELON_NARX, PREMIUM_ELON_NARX, user_id)
+        (VIP_ELON_NARX, VIP_ELON_NARX, user_id)
     )
     conn.commit()
 
     await update.message.reply_text(
-        "✅ Premium e’lon muvaffaqiyatli faollashtirildi!\n"
-        "Endi e’loningiz ro‘yxatda yuqorida chiqadi."
+        "✅ VIP e’lon muvaffaqiyatli faollashtirildi!\n"
+        "Endi e’loningiz ro‘yxatda yuqoriroqda chiqadi."
     )
 
     await context.bot.send_message(
         chat_id=ADMIN_ID,
-        text=f"📦 User {user_id} premium e’lon sotib oldi."
+        text=f"📦 User {user_id} VIP e’lon sotib oldi."
     )
 
 
-async def premium_elon_callback(update, context):
-    query = update.callback_query
-    await query.answer()
-
-    data = query.data.split('_')
-    if len(data) < 5:
-        await query.edit_message_text("❌ Ma'lumot noto‘g‘ri keldi.")
-        return
-
-    _, _, elon_turi, user_id, sanasi = data
-    user_id = int(user_id)
-
-    cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
-    result = cursor.fetchone()
-
-    if not result:
-        await query.edit_message_text("❌ Foydalanuvchi topilmadi.")
-        return
-
-    balans = result[0]
-    if balans < PREMIUM_ELON_NARX:
-        await query.edit_message_text(
-            f"❌ Balansingiz yetarli emas. Premium e’lon uchun {PREMIUM_ELON_NARX} so‘m kerak.\n"
-            "💳 Balansni to‘ldiring: /hisobim"
-        )
-        return
-
-    # Balansdan pul yechish
-    cursor.execute(
-        'UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ? WHERE user_id = ?',
-        (PREMIUM_ELON_NARX, PREMIUM_ELON_NARX, user_id)
-    )
-
-    # E'lonni Premium qilish
-    if elon_turi == 'yuk':
-        cursor.execute(
-            'UPDATE yuk_elonlar SET premium = 1 WHERE user_id = ? AND sanasi = ?',
-            (user_id, sanasi)
-        )
-    elif elon_turi == 'shofyor':
-        cursor.execute(
-            'UPDATE shofyor_elonlar SET premium = 1 WHERE user_id = ? AND sanasi = ?',
-            (user_id, sanasi)
-        )
-
-    conn.commit()
-
-    await query.edit_message_text("✅ E’lon Premium qilindi! Endi u ro‘yxatda yuqorida ko‘rsatiladi.")
-
-    await context.bot.send_message(
-        chat_id=ADMIN_ID,
-        text=f"📦 User {user_id} premium e’lon CALLBACK orqali sotib oldi. Turi: {elon_turi}"
-    )
-
-
-async def vip_aktiv(update, context):
+async def super_elon_qilish(update, context):
     user_id = update.message.from_user.id
 
     cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id = ?', (user_id,))
@@ -105,27 +50,25 @@ async def vip_aktiv(update, context):
         return
 
     balans = result[0]
-    if balans < VIP_NARX:
+    if balans < SUPER_ELON_NARX:
         await update.message.reply_text(
-            f"❌ Balansingiz yetarli emas. VIP olish uchun {VIP_NARX} so‘m kerak.\n"
+            f"❌ Balansingiz yetarli emas. Super e’lon uchun {SUPER_ELON_NARX} so‘m kerak.\n"
             "💳 Balansni to‘ldiring: /hisobim"
         )
         return
 
-    vip_muddati = datetime.datetime.now() + datetime.timedelta(days=30)
-    cursor.execute("""
-        UPDATE foydalanuvchilar 
-        SET balans = balans - ?, sarflangan = sarflangan + ?, vip_oxirgi = ?
-        WHERE user_id = ?
-    """, (VIP_NARX, VIP_NARX, vip_muddati.strftime('%Y-%m-%d'), user_id))
+    cursor.execute(
+        'UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ? WHERE user_id = ?',
+        (SUPER_ELON_NARX, SUPER_ELON_NARX, user_id)
+    )
     conn.commit()
 
     await update.message.reply_text(
-        "👑 VIP statusingiz 30 kun davomida faollashtirildi!\n\n"
-        "VIP bo‘lsangiz barcha funksiyalar bepul bo‘ladi.",
-        reply_markup=asosiy_menu()
+        "✅ Super e’lon muvaffaqiyatli faollashtirildi!\n"
+        "Endi e’loningiz maxsus tavsiya blokida va har doim yuqorida chiqadi."
     )
 
     await context.bot.send_message(
-        chat_id=ADMIN_ID,text=f"👑 User {user_id} VIP paket sotib oldi. Muddati: {vip_muddati.strftime('%Y-%m-%d')}."
+        chat_id=ADMIN_ID,
+        text=f"📦 User {user_id} Super e’lon sotib oldi."
     )
