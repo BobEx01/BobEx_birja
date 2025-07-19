@@ -19,7 +19,6 @@ async def vip_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """, (VIP_ELON_NARX, VIP_ELON_NARX, user_id))
     conn.commit()
 
-    # VIP belgisi va bonus
     cursor.execute("""
         UPDATE shofyor_elonlar
         SET premium = 2
@@ -27,7 +26,7 @@ async def vip_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """, (user_id,))
     conn.commit()
 
-    balans_oshirish(user_id, 0)  # balansni yangilash uchun
+    balans_oshirish(user_id, 0)  # balans yangilanishi uchun chaqirildi
 
     await update.message.reply_text("✅ E’loningiz VIP holatga o‘tkazildi! 1 ta telefon raqamni bepul olishingiz mumkin.")
     await context.bot.send_message(ADMIN_ID, f"📢 Foydalanuvchi {user_id} VIP e’lon sotib oldi.")
@@ -48,7 +47,6 @@ async def super_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """, (SUPER_ELON_NARX, SUPER_ELON_NARX, user_id))
     conn.commit()
 
-    # SUPER belgisi va bonus
     cursor.execute("""
         UPDATE shofyor_elonlar
         SET premium = 3
@@ -56,7 +54,7 @@ async def super_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """, (user_id,))
     conn.commit()
 
-    balans_oshirish(user_id, 0)  # balansni yangilash uchun
+    balans_oshirish(user_id, 0)  # balans yangilanishi uchun chaqirildi
 
     await update.message.reply_text("✅ E’loningiz Super holatga o‘tkazildi! 3 ta telefon raqamni bepul olishingiz mumkin.")
     await context.bot.send_message(ADMIN_ID, f"📢 Foydalanuvchi {user_id} Super e’lon sotib oldi.")
