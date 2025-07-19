@@ -63,7 +63,7 @@ async def super_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode='Markdown'
     )
 
-# --- QUYIDAGI IKKITA CALLBACK FUNKSIYA main.py uchun xato chiqmasligi uchun ---
+# VIP aktiv callback
 async def vip_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -74,6 +74,7 @@ async def vip_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         parse_mode='Markdown'
     )
 
+# Super aktiv callback
 async def super_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -83,3 +84,21 @@ async def super_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         "🎁 Bonus: 3 marta raqam olish imkoniyati.",
         parse_mode='Markdown'
     )
+
+# To'lov uchun tugmalar callback
+async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == 'vip_tolov':
+        await query.edit_message_text(
+            "💳 *VIP E'lon uchun to‘lov sahifasi:* https://to'lovlinki/vip\n"
+            "💵 Narx: 45,000 so'm",
+            parse_mode='Markdown'
+        )
+    elif query.data == 'super_tolov':
+        await query.edit_message_text(
+            "💳 *Super E'lon uchun to‘lov sahifasi:* https://to'lovlinki/super\n"
+            "💵 Narx: 90,000 so'm",
+            parse_mode='Markdown'
+        )
