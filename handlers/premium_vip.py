@@ -30,7 +30,8 @@ async def vip_elon_qilish(update, context):
 
     await update.message.reply_text(
         "✅ VIP e’lon muvaffaqiyatli faollashtirildi!\n"
-        "Endi e’loningiz ro‘yxatda yuqoriroqda chiqadi."
+        "Endi e’loningiz ro‘yxatda yuqoriroqda chiqadi.\n"
+        "Bonus: 1 ta telefon raqamni bepul olasiz!"
     )
 
     await context.bot.send_message(
@@ -65,7 +66,8 @@ async def super_elon_qilish(update, context):
 
     await update.message.reply_text(
         "✅ Super e’lon muvaffaqiyatli faollashtirildi!\n"
-        "Endi e’loningiz maxsus tavsiya blokida va har doim yuqorida chiqadi."
+        "Endi e’loningiz maxsus tavsiya blokida va har doim yuqorida chiqadi.\n"
+        "Bonus: 3 ta telefon raqamni bepul olasiz!"
     )
 
     await context.bot.send_message(
