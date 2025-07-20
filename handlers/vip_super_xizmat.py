@@ -1,6 +1,17 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
+# Bonus paket qo'shish funksiyasi (bazaga moslab o'zgartiring)
+async def bonus_paket_qoshish(user_id: int, bonus_turi: str):
+    # bonus_turi: 'vip' yoki 'super'
+    # Bu yerda sizning ma'lumotlar bazangizga bonus qo'shish logikasi bo'ladi
+    # Misol uchun:
+    # if bonus_turi == 'vip':
+    #     db.add_bonus(user_id, 1)  # 1 ta telefon raqam olish huquqi
+    # elif bonus_turi == 'super':
+    #     db.add_bonus(user_id, 3)  # 3 ta telefon raqam olish huquqi
+    print(f"User {user_id} uchun {bonus_turi} bonus paketi qo'shildi.")  # DEBUG uchun
+
 # VIP E'lon funksiyasi
 async def vip_elon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
@@ -63,9 +74,11 @@ async def super_aktiv(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode='Markdown'
     )
 
-# VIP aktiv callback
+# VIP aktiv callback — bonus berish bilan
 async def vip_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    user_id = query.from_user.id
+    await bonus_paket_qoshish(user_id, 'vip')
     await query.answer()
     await query.edit_message_text(
         "✅ *VIP E'lon aktivlashtirildi!*\n\n"
@@ -74,9 +87,11 @@ async def vip_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         parse_mode='Markdown'
     )
 
-# Super aktiv callback
+# Super aktiv callback — bonus berish bilan
 async def super_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    user_id = query.from_user.id
+    await bonus_paket_qoshish(user_id, 'super')
     await query.answer()
     await query.edit_message_text(
         "✅ *Super E'lon aktivlashtirildi!*\n\n"
@@ -91,8 +106,7 @@ async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_T
     await query.answer()
 
     if query.data == 'vip_tolov':
-        await query.edit_message_text(
-            "💳 *VIP E'lon uchun to‘lov sahifasi:* https://to'lovlinki/vip\n"
+        await query.edit_message_text("💳 *VIP E'lon uchun to‘lov sahifasi:* https://to'lovlinki/vip\n"
             "💵 Narx: 45,000 so'm",
             parse_mode='Markdown'
         )
