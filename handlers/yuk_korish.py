@@ -4,7 +4,8 @@ from database import cursor, conn
 from config import RAQAM_NARX
 from handlers.start import asosiy_menu
 
-# 📌 Viloyatlar bo'yicha yuk e'lonlarini ko'rish
+
+# 📦 Viloyatlar bo‘yicha yuk e'lonlarini ko‘rish
 async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cursor.execute("SELECT viloyat, COUNT(*) FROM yuk_elonlar GROUP BY viloyat")
     viloyatlar = cursor.fetchall()
@@ -22,7 +23,7 @@ async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Viloyatni tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# 📌 Tumanlar ko‘rsatish
+# 📦 Tumanlar ko‘rsatish
 async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -47,7 +48,7 @@ async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# 📌 E'lonlarni ko‘rsatish
+# 📦 E'lonlarni ko‘rsatish
 async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -102,16 +103,17 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
     )
 
-# 📌 Orqaga viloyatlar ro'yxatiga
+
+# 📦 Orqaga viloyatlar
 async def orqaga_viloyatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     await yuk_korish(update, context)
 
-# 📌 Orqaga tumanlar ro'yxatigaasync def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+# 📦 Orqaga tumanlarasync def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data.split('_')
     viloyat = data[2]
-    context.user_data['viloyat'] = viloyat
     await tumanlar_korish(update, context)
