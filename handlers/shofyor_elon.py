@@ -82,8 +82,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_id = update.message.from_user.id
     context.user_data['telefon'] = update.message.text
-    context.user_data['user_id'] = user_id
-    context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    sanasi = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if not foydalanuvchi_mavjudmi(user_id):
         cursor.execute("INSERT INTO foydalanuvchilar (user_id, balans, sarflangan) VALUES (?, 0, 0)", (user_id,))
@@ -101,25 +100,67 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['sigim'],
         context.user_data['narx'],
         context.user_data['telefon'],
-        context.user_data['sanasi']
+        sanasi
     ))
     conn.commit()
 
-    await update.message.reply_text("✅ Shofyor e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
-
-    # VIP va SUPER taklif qilish
-    await update.message.reply_text(
+    await update.message.reply_text("✅ Shofyor e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())await update.message.reply_text(
         "🔝 E’loningizni yanada samarali qilishni xohlaysizmi?\nQuyidagilardan birini tanlang:",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton(f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m", callback_data=f"vip_shofyor_{user_id}|{context.user_data['sanasi']}")],
-            [InlineKeyboardButton(f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m", callback_data=f"super_shofyor_{user_id}|{context.user_data['sanasi']}")]
+            [InlineKeyboardButton(f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m", callback_data=f"vip_shofyor_{user_id}|{sanasi}")],
+            [InlineKeyboardButton(f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m", callback_data=f"super_shofyor_{user_id}|{sanasi}")]
         ])
     )
 
-    asyncio.create_task(elon_muddat_tugashi(user_id, context.user_data['sanasi'], context))
+    asyncio.create_task(elon_muddat_tugashi(user_id, sanasi, context))
 
     await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
+
+
+async def elon_muddat_tugashi(user_id, sanasi, context):
+    await asyncio.sleep(24 * 60 * 60)
+
+    cursor.execute("SELECT * FROM shofyor_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
+    elon = cursor.fetchone()
+    if elon:
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("✅ Uzaytirish", callback_data=f"uzaytir_shofyor_{user_id}|{sanasi}")],
+            [InlineKeyboardButton("❌ O‘chirish", callback_data=f"ochir_shofyor_{user_id}|{sanasi}")]
+        ])
+        await context.bot.send_message(chat_id=user_id, text="⏳ E'loningiz muddati tugadi. Uzaytirasizmi?", reply_markup=keyboard)
+
+
+async def uzaytirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data.split('_', 2)[-1]
+    user_id_str, sanasi = data.split('|', 1)
+    user_id = int(user_id_str)
+
+    cursor.execute('''
+        UPDATE shofyor_elonlar SET sanasi=? WHERE user_id=? AND sanasi=?
+    ''', (datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id, sanasi))
+    conn.commit()
+
+    await query.edit_message_text("✅ E’loningiz muddati uzaytirildi.")
+
+
+async def ochirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data.split('_', 2)[-1]
+    user_id_str, sanasi = data.split('|', 1)
+    user_id = int(user_id_str)
+
+    cursor.execute('''
+        DELETE FROM shofyor_elonlar WHERE user_id=? AND sanasi=?
+    ''', (user_id, sanasi))
+    conn.commit()
+
+    await query.edit_message_text("❌ E’loningiz o‘chirildi.")
 
 
 async def vip_shofyor_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -165,48 +206,3 @@ async def elon_upgrade_callback(update: Update, context: ContextTypes.DEFAULT_TY
 
     await query.edit_message_text(f"✅ E’loningiz {tur} holatga ko‘tarildi.\nBonus: {bonus} ta telefon raqam bepul olish huquqi berildi!")
     await context.bot.send_message(ADMIN_ID, f"📢 User {user_id} shofyor e’loni uchun {tur} sotib oldi.")
-
-# E'lon muddati tugashi
-async def elon_muddat_tugashi(user_id, sanasi, context):
-    await asyncio.sleep(24 * 60 * 60)  # 24 soat kutish
-
-    cursor.execute("SELECT * FROM shofyor_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
-    elon = cursor.fetchone()
-    if elon:
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("✅ Uzaytirish", callback_data=f"uzaytir_shofyor_{user_id}|{sanasi}")],
-            [InlineKeyboardButton("❌ O‘chirish", callback_data=f"ochir_shofyor_{user_id}|{sanasi}")]
-        ])
-        await context.bot.send_message(chat_id=user_id, text="⏳ E'loningiz muddati tugadi. Uzaytirasizmi?", reply_markup=keyboard)
-
-
-async def uzaytirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    data = query.data.split('_', 2)[-1]
-    user_id_str, sanasi = data.split('|', 1)
-    user_id = int(user_id_str)
-
-    cursor.execute('''
-        UPDATE shofyor_elonlar SET sanasi=? WHERE user_id=? AND sanasi=?
-    ''', (datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id, sanasi))
-    conn.commit()
-
-    await query.edit_message_text("✅ E’loningiz muddati uzaytirildi.")
-
-
-async def ochirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    data = query.data.split('_', 2)[-1]
-    user_id_str, sanasi = data.split('|', 1)
-    user_id = int(user_id_str)
-
-    cursor.execute('''
-        DELETE FROM shofyor_elonlar WHERE user_id=? AND sanasi=?
-    ''', (user_id, sanasi))
-    conn.commit()
-
-    await query.edit_message_text("❌ E’loningiz o‘chirildi.")
