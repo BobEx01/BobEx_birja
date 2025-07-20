@@ -4,7 +4,7 @@ from database import cursor, conn
 from config import RAQAM_NARX
 from handlers.start import asosiy_menu
 
-# Viloyatlar bo'yicha yuk e'lonlarini ko'rish
+# 📌 Viloyatlar bo'yicha yuk e'lonlarini ko'rish
 async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cursor.execute("SELECT viloyat, COUNT(*) FROM yuk_elonlar GROUP BY viloyat")
     viloyatlar = cursor.fetchall()
@@ -17,18 +17,16 @@ async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton(f"{viloyat} ({count} ta)", callback_data=f"viloyat_{viloyat}")]
         for viloyat, count in viloyatlar
     ]
-
     keyboard.append([InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")])
 
     await update.message.reply_text("Viloyatni tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# Tumanlar bo'yicha yuk e'lonlarini ko'rish
+# 📌 Tumanlar ko‘rsatish
 async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     viloyat = query.data.split('_')[1]
-    context.user_data['viloyat'] = viloyat
 
     cursor.execute("SELECT tuman, COUNT(*) FROM yuk_elonlar WHERE viloyat = ? GROUP BY tuman", (viloyat,))
     tumanlar = cursor.fetchall()
@@ -49,16 +47,18 @@ async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# E'lonlarni ko‘rsatish
+# 📌 E'lonlarni ko‘rsatish
 async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     _, viloyat, tuman = query.data.split('_')
 
-    cursor.execute(
-        "SELECT id, qayerdan, qayerga, ogirlik, mashina, narx, premium, korilgan FROM yuk_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
-        (viloyat, tuman)
-    )
+    cursor.execute("""
+        SELECT id, qayerdan, qayerga, ogirlik, mashina, narx, premium, korilgan 
+        FROM yuk_elonlar 
+        WHERE viloyat = ? AND tuman = ? 
+        ORDER BY premium DESC, sanasi DESC
+    """, (viloyat, tuman))
     elonlar = cursor.fetchall()
 
     if not elonlar:
@@ -102,13 +102,13 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
     )
 
-
-# Orqaga viloyatlar ro'yxatiga qaytish
+# 📌 Orqaga viloyatlar ro'yxatiga
 async def orqaga_viloyatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await yuk_korish(update, context)# Orqaga tumanlar ro'yxatiga qaytish
-async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await yuk_korish(update, context)
+
+# 📌 Orqaga tumanlar ro'yxatigaasync def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data.split('_')
