@@ -83,7 +83,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     context.user_data['telefon'] = update.message.text
     context.user_data['user_id'] = user_id
-    context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    sanasi = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if not foydalanuvchi_mavjudmi(user_id):
         cursor.execute("INSERT INTO foydalanuvchilar (user_id, balans, sarflangan) VALUES (?, 0, 0)", (user_id,))
@@ -101,22 +101,22 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['sigim'],
         context.user_data['narx'],
         context.user_data['telefon'],
-        context.user_data['sanasi']
+        sanasi
     ))
     conn.commit()
 
     await update.message.reply_text("✅ Shofyor e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
-    # VIP va Super taklif
+    # VIP va SUPER taklif qilish
     await update.message.reply_text(
         "🔝 E’loningizni yanada samarali qilishni xohlaysizmi?\nQuyidagilardan birini tanlang:",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton(f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m", callback_data=f"vip_shofyor_{user_id}|{context.user_data['sanasi']}")],
-            [InlineKeyboardButton(f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m", callback_data=f"super_shofyor_{user_id}|{context.user_data['sanasi']}")]
+            [InlineKeyboardButton(f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m", callback_data=f"vip_shofyor_{user_id}|{sanasi}")],
+            [InlineKeyboardButton(f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m", callback_data=f"super_shofyor_{user_id}|{sanasi}")]
         ])
     )
 
-    asyncio.create_task(elon_muddat_tugashi(user_id, context.user_data['sanasi'], context))
+    asyncio.create_task(elon_muddat_tugashi(user_id, sanasi, context))
 
     await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
@@ -159,9 +159,7 @@ async def ochirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id_str, sanasi = data.split('|', 1)
     user_id = int(user_id_str)
 
-    cursor.execute('''
-        DELETE FROM shofyor_elonlar WHERE user_id=? AND sanasi=?
-    ''', (user_id, sanasi))
+    cursor.execute('DELETE FROM shofyor_elonlar WHERE user_id=? AND sanasi=?', (user_id, sanasi))
     conn.commit()
 
     await query.edit_message_text("❌ E’loningiz o‘chirildi.")
