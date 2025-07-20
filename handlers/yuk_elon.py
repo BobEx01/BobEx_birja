@@ -122,15 +122,15 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
     await update.message.reply_text(
-        "📣 E’loningizni ko‘proq ko‘rsatish uchun quyidagi xizmatlardan foydalaning:\n\n"
-        f"🔝 *VIP e’lon* — {VIP_ELON_NARX} so‘m: Oddiy e’lonlardan doim yuqorida.\n"
-        f"🚀 *SUPER e’lon* — {SUPER_ELON_NARX} so‘m: Barcha e’lonlar ustida ko‘rsatiladi.\n"
-        f"🎁 Bonus raqam olish imkoniyatlari mavjud!",
+        "❗️ E’loningizni yanada ko‘proq odam ko‘rishini xohlaysizmi?\n\n"
+        f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m\n"
+        f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m\n"
+        "🎁 VIP: 1 ta raqam olish imkoniyati\n"
+        "🎁 Super: 3 ta raqam olish imkoniyati",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔝 VIP e’lon qilish", callback_data=f"vip_yuk_{user_id}|{sanasi}")],
-            [InlineKeyboardButton("🚀 Super e’lon qilish", callback_data=f"super_yuk_{user_id}|{sanasi}")]
-        ]),
-        parse_mode='Markdown'
+            [InlineKeyboardButton("🔸 VIP e’lon qilish", callback_data=f"vip_yuk_{user_id}|{sanasi}")],
+            [InlineKeyboardButton("🌟 Super e’lon qilish", callback_data=f"super_yuk_{user_id}|{sanasi}")]
+        ])
     )
 
     asyncio.create_task(elon_muddat_tugashi(user_id, sanasi, context))
@@ -145,7 +145,11 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
     elon = cursor.fetchone()
     if elon:
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("✅ Uzaytirish", callback_data=f"uzaytir_{user_id}_{sanasi}")],
-            [InlineKeyboardButton("❌ O‘chirish", callback_data=f"ochir_{user_id}_{sanasi}")]
+            [InlineKeyboardButton("✅ E'lonni O‘chirish", callback_data=f"ochir_yuk_{user_id}_{sanasi}")],
+            [InlineKeyboardButton("❌ Qoldirish", callback_data=f"qoldir_yuk_{user_id}_{sanasi}")]
         ])
-        await context.bot.send_message(chat_id=user_id, text="⏳ E'loningiz muddati tugadi. Uzaytirasizmi?", reply_markup=keyboard)
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="⏳ E'loningiz muddati tugadi. O‘chirilsinmi yoki qoldirilsinmi?",
+            reply_markup=keyboard
+        )
