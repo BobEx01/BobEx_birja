@@ -124,9 +124,6 @@ def main():
     app.add_handler(CallbackQueryHandler(shofyor_elon.uzaytirish_callback, pattern='^uzaytir_shofyor_'))
     app.add_handler(CallbackQueryHandler(shofyor_elon.ochirish_callback, pattern='^ochir_shofyor_'))
 
-    # ✅ --- YUK OCHIR/QOLDIR --- RAQAM OLISHDAN KEYIN KELGAN TUGMALAR UCHUN ---
-    app.add_handler(CallbackQueryHandler(yuk_elon.yuk_ochir_qoldir_callback, pattern='^(yuk_ochir|yuk_qoldir)_'))
-
     # --- ADMIN XABAR ---
     app.add_handler(MessageHandler(filters.Regex("^📣 Admin xabar$"), admin_xabar.admin_xabar_handler))
 
