@@ -18,7 +18,6 @@ async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton(f"{viloyat} ({count} ta)", callback_data=f"viloyat_{viloyat}")]
         for viloyat, count in viloyatlar
     ]
-
     keyboard.append([InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")])
 
     await update.message.reply_text("Viloyatni tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
@@ -73,26 +72,30 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cursor.execute("UPDATE yuk_elonlar SET korilgan = korilgan + 1 WHERE id = ?", (elon_id,))
         conn.commit()
 
-        text = (
-            f"🏷 Yuk E’lon ID: {elon_id}\n"
-            f"📍 Manzil: {viloyat}, {tuman}\n"
-            f"🚩 Qayerdan: {qayerdan}\n"
-            f"🏁 Qayerga: {qayerga}\n"
-            f"⚖️ Og‘irligi: {ogirlik}\n"
-            f"🚚 Mashina turi: {mashina}\n"
-            f"💰 Narx: {narx} so‘m\n"
-            f"👁 Ko‘rilgan: {korilgan + 1} marta\n"
-        )
+        premium_text = ""
+        if premium == 2:
+            premium_text = "🌟 *SUPER E'lon*\n\n"
+        elif premium == 1:
+            premium_text = "💎 *VIP E'lon*\n\n"
 
-        if premium == 1:
-            text = "💎 PREMIUM E'LON 💎\n\n" + text
+        text = (
+            f"{premium_text}"
+            f"🏷 *Yuk E’lon ID:* {elon_id}\n"
+            f"📍 *Manzil:* {viloyat}, {tuman}\n"
+            f"🚩 *Qayerdan:* {qayerdan}\n"
+            f"🏁 *Qayerga:* {qayerga}\n"
+            f"⚖️ *Og‘irligi:* {ogirlik}\n"
+            f"🚚 *Mashina turi:* {mashina}\n"
+            f"💰 *Narx:* {narx} so‘m\n"
+            f"👁 *Ko‘rilgan:* {korilgan + 1} marta\n"
+        )
 
         # Raqam olish uchun tugma
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton(f"📞 Raqam olish ({RAQAM_NARX} so‘m)", callback_data=f"yuk_raqam_{elon_id}")
         ]])
 
-        await query.message.reply_text(text, reply_markup=keyboard)
+        await query.message.reply_text(text, reply_markup=keyboard, parse_mode='Markdown')
 
     # Pastda orqaga va asosiy menyu tugmalari
     await query.message.reply_text(
@@ -104,11 +107,13 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# Orqaga viloyatlar tugmasi
-async def orqaga_viloyatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# Orqaga viloyatlar tugmasiasync def orqaga_viloyatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await yuk_korish(update.callback_query, context)# Orqaga tumanlar tugmasi
+    await yuk_korish(update.callback_query, context)
+
+
+# Orqaga tumanlar tugmasi
 async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
