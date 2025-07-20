@@ -14,16 +14,10 @@ CREATE TABLE IF NOT EXISTS foydalanuvchilar (
     vip_oxirgi TEXT DEFAULT 'Yo‘q',
     sarflangan INTEGER DEFAULT 0,
     paketlar TEXT DEFAULT 'Yo‘q',
-    toldirilgan INTEGER DEFAULT 0
+    toldirilgan INTEGER DEFAULT 0,
+    referal_id INTEGER DEFAULT 0
 )
 ''')
-
-# --- referal_id ustuni mavjudligini tekshirish va yo‘q bo‘lsa qo‘shish ---
-cursor.execute("PRAGMA table_info(foydalanuvchilar)")
-ustunlar = [row[1] for row in cursor.fetchall()]
-if 'referal_id' not in ustunlar:
-    cursor.execute('ALTER TABLE foydalanuvchilar ADD COLUMN referal_id INTEGER DEFAULT 0')
-    conn.commit()
 
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS yuk_elonlar (
@@ -88,7 +82,7 @@ CREATE TABLE IF NOT EXISTS tolov_log (
 
 conn.commit()
 
-# === Funksiyalar ===
+# === FUNKSIYALAR ===
 
 def foydalanuvchi_qoshish(user_id: int, username: str):
     cursor.execute("INSERT OR IGNORE INTO foydalanuvchilar (user_id, username) VALUES (?, ?)", (user_id, username))
@@ -135,7 +129,6 @@ def tolov_log_qoshish(user_id: int, summa: int, sana: str, izoh: str):
     ''', (user_id, summa, sana, izoh))
     conn.commit()
 
-# === FOYDALANUVCHILAR SONI FUNKSIYASI ===
 def foydalanuvchilar_soni():
     cursor.execute("SELECT COUNT(*) FROM foydalanuvchilar")
     natija = cursor.fetchone()
