@@ -46,7 +46,7 @@ async def shofyor_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
 
     await query.message.edit_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:",
-                                  reply_markup=InlineKeyboardMarkup(keyboard))
+                                 reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
