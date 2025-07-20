@@ -82,7 +82,8 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_id = update.message.from_user.id
     context.user_data['telefon'] = update.message.text
-    sanasi = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    context.user_data['user_id'] = user_id
+    context.user_data['sanasi'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if not foydalanuvchi_mavjudmi(user_id):
         cursor.execute("INSERT INTO foydalanuvchilar (user_id, balans, sarflangan) VALUES (?, 0, 0)", (user_id,))
@@ -100,19 +101,22 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['sigim'],
         context.user_data['narx'],
         context.user_data['telefon'],
-        sanasi
+        context.user_data['sanasi']
     ))
     conn.commit()
 
-    await update.message.reply_text("✅ Shofyor e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())await update.message.reply_text(
+    await update.message.reply_text("✅ Shofyor e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
+
+    # VIP va Super taklif
+    await update.message.reply_text(
         "🔝 E’loningizni yanada samarali qilishni xohlaysizmi?\nQuyidagilardan birini tanlang:",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton(f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m", callback_data=f"vip_shofyor_{user_id}|{sanasi}")],
-            [InlineKeyboardButton(f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m", callback_data=f"super_shofyor_{user_id}|{sanasi}")]
+            [InlineKeyboardButton(f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m", callback_data=f"vip_shofyor_{user_id}|{context.user_data['sanasi']}")],
+            [InlineKeyboardButton(f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m", callback_data=f"super_shofyor_{user_id}|{context.user_data['sanasi']}")]
         ])
     )
 
-    asyncio.create_task(elon_muddat_tugashi(user_id, sanasi, context))
+    asyncio.create_task(elon_muddat_tugashi(user_id, context.user_data['sanasi'], context))
 
     await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
@@ -161,48 +165,3 @@ async def ochirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
 
     await query.edit_message_text("❌ E’loningiz o‘chirildi.")
-
-
-async def vip_shofyor_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await elon_upgrade_callback(update, context, 'VIP', VIP_ELON_NARX, bonus=1)
-
-
-async def super_shofyor_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await elon_upgrade_callback(update, context, 'SUPER', SUPER_ELON_NARX, bonus=3)
-
-
-async def elon_upgrade_callback(update: Update, context: ContextTypes.DEFAULT_TYPE, tur, narx, bonus):
-    query = update.callback_query
-    await query.answer()
-
-    data = query.data.split('_')[-1]
-    user_id_str, sanasi = data.split('|', 1)
-    user_id = int(user_id_str)
-
-    cursor.execute('SELECT balans FROM foydalanuvchilar WHERE user_id=?', (user_id,))
-    result = cursor.fetchone()
-    if not result:
-        await query.edit_message_text("❌ Balansingiz topilmadi. Avval balansni to‘ldiring.")
-        return
-
-    balans = result[0]
-    if balans < narx:
-        await query.edit_message_text("❌ Balansingiz yetarli emas. Iltimos, balansingizni to‘ldiring.")
-        return
-
-    cursor.execute('''
-        UPDATE foydalanuvchilar
-        SET balans = balans - ?, sarflangan = sarflangan + ?
-        WHERE user_id=?
-    ''', (narx, narx, user_id))
-
-    cursor.execute('''
-        UPDATE shofyor_elonlar
-        SET premium = 1
-        WHERE user_id=? AND sanasi=?
-    ''', (user_id, sanasi))
-
-    conn.commit()
-
-    await query.edit_message_text(f"✅ E’loningiz {tur} holatga ko‘tarildi.\nBonus: {bonus} ta telefon raqam bepul olish huquqi berildi!")
-    await context.bot.send_message(ADMIN_ID, f"📢 User {user_id} shofyor e’loni uchun {tur} sotib oldi.")
