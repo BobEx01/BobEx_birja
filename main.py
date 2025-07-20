@@ -1,13 +1,13 @@
 import logging
 from telegram import Update
 from telegram.ext import (
-    ApplicationBuilder,
+    Application,
     CommandHandler,
     CallbackQueryHandler,
     MessageHandler,
     ConversationHandler,
-    ContextTypes,
-    filters
+    filters,
+    ContextTypes
 )
 
 from config import TOKEN
@@ -28,10 +28,42 @@ from handlers import (
     bonus_va_promo
 )
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+# Bonus paket qo'shish funksiyasi (misol, real bazaga moslashtiring)
+async def bonus_paket_qoshish(user_id: int, bonus_turi: str):
+    # bonus_turi: 'vip' yoki 'super'
+    # Bu yerda ma'lumotlar bazasiga bonus paket qo'shish kodi bo'lishi kerak
+    print(f"User {user_id} uchun {bonus_turi} bonus paketi qo'shildi.")
+
+
+# VIP aktiv callbackda bonusni qo‘shish uchun yangi funksiya yozamiz
+async def vip_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = query.from_user.id
+    await bonus_paket_qoshish(user_id, 'vip')
+    await query.answer()
+    await query.edit_message_text(
+        "✅ *VIP E'lon aktivlashtirildi!*\n\n"
+        "⏰ Muddat: 24 soat\n"
+        "🎁 Bonus: 1 marta telefon raqam olish imkoniyati.",
+        parse_mode='Markdown'
+    )
+
+async def super_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = query.from_user.id
+    await bonus_paket_qoshish(user_id, 'super')
+    await query.answer()
+    await query.edit_message_text(
+        "✅ *Super E'lon aktivlashtirildi!*\n\n"
+        "⏰ Muddat: 24 soat\n"
+        "🎁 Bonus: 3 marta telefon raqam olish imkoniyati.",
+        parse_mode='Markdown'
+    )
+
+
+# VIP va Super e'lon to‘lov tugmalari uchun umumiy callback handler
 async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -49,8 +81,9 @@ async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_T
             parse_mode='Markdown'
         )
 
+
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = Application.builder().token(TOKEN).build()
 
     # --- START komandasi ---
     app.add_handler(CommandHandler('start', start.boshlash))
@@ -84,8 +117,8 @@ def main():
     # --- VIP/SUPER E'LON ---
     app.add_handler(CommandHandler('vip_elon', vip_super_xizmat.vip_elon))
     app.add_handler(CommandHandler('super_elon', vip_super_xizmat.super_elon))
-    app.add_handler(CommandHandler('vip_aktiv', vip_super_xizmat.vip_aktiv))
-    app.add_handler(CommandHandler('super_aktiv', vip_super_xizmat.super_aktiv))
+    app.add_handler(CommandHandler('vip_aktiv', vip_aktiv_callback))  # bonusli callbackni shu yerga
+    app.add_handler(CommandHandler('super_aktiv', super_aktiv_callback))  # bonusli callbackni shu yerga
 
     # --- BONUS VA PROMO TAKLIF ---
     app.add_handler(CommandHandler('elon_bonus', bonus_va_promo.elon_bonus_taklif))
@@ -141,8 +174,8 @@ def main():
     app.add_handler(CallbackQueryHandler(raqam_olish.raqam_olish_handler, pattern='^(yuk_raqam_|shofyor_raqam_)'))
 
     # --- VIP/SUPER E'lon CALLBACKLAR ---
-    app.add_handler(CallbackQueryHandler(vip_super_xizmat.vip_aktiv_callback, pattern='^vip_elon_'))
-    app.add_handler(CallbackQueryHandler(vip_super_xizmat.super_aktiv_callback, pattern='^super_elon_'))
+    app.add_handler(CallbackQueryHandler(vip_aktiv_callback, pattern='^vip_elon_'))
+    app.add_handler(CallbackQueryHandler(super_aktiv_callback, pattern='^super_elon_'))
 
     # ✅ VIP va Super E'lon to‘lov tugmalari uchun umumiy Callback
     app.add_handler(CallbackQueryHandler(handle_vip_super_tolov, pattern='^(vip_tolov|super_tolov)$'))
