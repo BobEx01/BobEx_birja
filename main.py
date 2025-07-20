@@ -106,7 +106,8 @@ def main():
     # --- BONUS VA PROMO TAKLIF ---
     app.add_handler(CommandHandler('elon_bonus', bonus_va_promo.elon_bonus_taklif))
 
-    # --- YUK ELON ---yuk_elon_conv = ConversationHandler(
+    # --- YUK ELON ---
+    yuk_elon_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^🚛 Yuk uchun e'lon berish$"), yuk_elon.yuk_elon_start)],
         states={
             "viloyat": [MessageHandler(filters.TEXT & ~filters.COMMAND, yuk_elon.viloyat_qabul)],
