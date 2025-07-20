@@ -1,5 +1,5 @@
 from database import cursor, conn
-from config import RAQAM_NARX
+from config import RAQAM_NARX, ADMIN_ID
 import datetime
 
 async def raqam_olish_handler(update, context):
@@ -22,20 +22,18 @@ async def raqam_olish_handler(update, context):
         )
         return
 
-    # Raqam olish
-    telefon = ''
+    # Telefon va elon egasini aniqlash
     if elon_turi == 'yuk':
-        cursor.execute('SELECT telefon FROM yuk_elonlar WHERE id=?', (elon_id,))
+        cursor.execute('SELECT telefon, user_id FROM yuk_elonlar WHERE id=?', (elon_id,))
     else:
-        cursor.execute('SELECT telefon FROM shofyor_elonlar WHERE id=?', (elon_id,))
+        cursor.execute('SELECT telefon, user_id FROM shofyor_elonlar WHERE id=?', (elon_id,))
 
     tel_result = cursor.fetchone()
-    if tel_result:
-        telefon = tel_result[0]
-
-    if not telefon:
+    if not tel_result:
         await query.edit_message_text("❌ Kechirasiz, telefon raqami topilmadi.")
         return
+
+    telefon, elon_egasi = tel_result
 
     # Balansdan yechish
     cursor.execute('UPDATE foydalanuvchilar SET balans = balans - ? WHERE user_id=?',
@@ -59,3 +57,21 @@ async def raqam_olish_handler(update, context):
         f"📞 Telefon raqam: {telefon}\n\n"
         "✅ Raqam muvaffaqiyatli olindi!"
     )
+
+    # ELON EGASIGA OG'OHLANTIRISH
+    try:
+        await context.bot.send_message(
+            chat_id=elon_egasi,
+            text=f"📢 Sizning e’loningiz bo‘yicha raqamingiz olindi!\n🆔 E'lon ID: {elon_id}\n📞 Sizning raqamingiz: {telefon}"
+        )
+    except Exception as e:
+        print(f"Elon egasiga xabar yuborib bo'lmadi: {e}")
+
+    # ADMINGA HAM XABAR BERSA BO'LADI
+    try:
+        await context.bot.send_message(
+            chat_id=ADMIN_ID,
+            text=f"🔔 User {user_id} foydalanuvchi {elon_turi} e'lon (ID: {elon_id}) uchun raqam oldi.\n📞 Raqam: {telefon}"
+        )
+    except Exception as e:
+        print(f"Admin xabari yuborilmadi: {e}")
