@@ -1,6 +1,7 @@
 from database import cursor, conn
-from config import RAQAM_NARX, ADMIN_ID
+from config import RAQAM_NARX
 import datetime
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 async def raqam_olish_handler(update, context):
     query = update.callback_query
@@ -22,18 +23,22 @@ async def raqam_olish_handler(update, context):
         )
         return
 
-    # Telefon va elon egasini aniqlash
+    # Raqam olish
+    telefon = ''
+    elon_egasi = None
     if elon_turi == 'yuk':
         cursor.execute('SELECT telefon, user_id FROM yuk_elonlar WHERE id=?', (elon_id,))
     else:
         cursor.execute('SELECT telefon, user_id FROM shofyor_elonlar WHERE id=?', (elon_id,))
 
     tel_result = cursor.fetchone()
-    if not tel_result:
+    if tel_result:
+        telefon = tel_result[0]
+        elon_egasi = tel_result[1]
+
+    if not telefon:
         await query.edit_message_text("❌ Kechirasiz, telefon raqami topilmadi.")
         return
-
-    telefon, elon_egasi = tel_result
 
     # Balansdan yechish
     cursor.execute('UPDATE foydalanuvchilar SET balans = balans - ? WHERE user_id=?',
@@ -58,20 +63,23 @@ async def raqam_olish_handler(update, context):
         "✅ Raqam muvaffaqiyatli olindi!"
     )
 
-    # ELON EGASIGA OG'OHLANTIRISH
-    try:
-        await context.bot.send_message(
-            chat_id=elon_egasi,
-            text=f"📢 Sizning e’loningiz bo‘yicha raqamingiz olindi!\n🆔 E'lon ID: {elon_id}\n📞 Sizning raqamingiz: {telefon}"
-        )
-    except Exception as e:
-        print(f"Elon egasiga xabar yuborib bo'lmadi: {e}")
+    # ELON EGASIGA OG'OHLANTIRISH VA O‘CHIRISH/QOLDIRISH TUGMALARI
+    if elon_egasi:
+        tugmalar = InlineKeyboardMarkup([
+            [InlineKeyboardButton("❌ E'lonni o‘chirish", callback_data=f"ochir_{elon_turi}_{elon_id}")],
+            [InlineKeyboardButton("✅ E'lonni qoldirish", callback_data=f"qoldir_{elon_turi}_{elon_id}")]
+        ])
 
-    # ADMINGA HAM XABAR BERSA BO'LADI
-    try:
-        await context.bot.send_message(
-            chat_id=ADMIN_ID,
-            text=f"🔔 User {user_id} foydalanuvchi {elon_turi} e'lon (ID: {elon_id}) uchun raqam oldi.\n📞 Raqam: {telefon}"
-        )
-    except Exception as e:
-        print(f"Admin xabari yuborilmadi: {e}")
+        try:
+            await context.bot.send_message(
+                chat_id=elon_egasi,
+                text=(
+                    f"📢 Sizning e’loningiz bo‘yicha raqamingiz olindi!\n"
+                    f"🆔 E'lon ID: {elon_id}\n"
+                    f"📞 Sizning raqamingiz: {telefon}\n\n"
+                    "👇 Quyidagi tugmalar orqali e'loningizni boshqarishingiz mumkin."
+                ),
+                reply_markup=tugmalar
+            )
+        except Exception as e:
+            print(f"Elon egasiga xabar yuborishda xato: {e}")
