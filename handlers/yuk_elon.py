@@ -1,5 +1,3 @@
-# handlers/yuk_elon.py
-
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 import datetime
@@ -93,8 +91,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sanasi = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     muddat = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
 
-    cursor.execute('''INSERT INTO yuk_elonlar 
-           (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
+    cursor.execute('''INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)''',
         (
             user_id,
@@ -112,23 +109,72 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     conn.commit()
 
-    # VIP/SUPER tugmalar callback_data yangi formatda
     await update.message.reply_text(
         "✅ Yuk e’loningiz joylandi!\n\n"
-        f"🔸 VIP E'lon — {VIP_ELON_NARX} so'm\n"
-        f"🌟 Super E'lon — {SUPER_ELON_NARX} so'm\n\n"
-        "Kerakli tugmani bosing:",
+        "🟢 E'loningiz hozircha oddiy holatda.\n\n"
+        "📣 VIP yoki Super e’lon xizmati orqali e’loningizni yuqoriga chiqarishingiz mumkin!\n"
+        f"🔸 VIP E'lon — {VIP_ELON_NARX} so‘m\n"
+        f"🌟 Super E'lon — {SUPER_ELON_NARX} so‘m\n\n"
+        "👇 Quyidagi tugmalardan birini tanlang:",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔸 VIP E’lon qilish", callback_data=f"vip_elon_{user_id}|{sanasi}")],
-            [InlineKeyboardButton("🌟 Super E’lon qilish", callback_data=f"super_elon_{user_id}|{sanasi}")]
+            [InlineKeyboardButton("🔸 VIP E’lon qilish", callback_data=f"vip_yuk_{user_id}|{sanasi}")],
+            [InlineKeyboardButton("🌟 Super E’lon qilish", callback_data=f"super_yuk_{user_id}|{sanasi}")]
         ])
     )
 
-    # Muddati tugashi uchun soatli ogohlantirish
     asyncio.create_task(elon_muddat_tugashi(user_id, sanasi, context))
 
     await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
+
+
+async def vip_yuk_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = query.from_user.id
+    data = query.data.split('|')
+    sanasi = data[1]
+
+    cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id=?", (user_id,))
+    balans = cursor.fetchone()
+    if not balans or balans[0] < VIP_ELON_NARX:
+        await query.answer("❌ Balansingiz yetarli emas. Balansni to‘ldiring.", show_alert=True)
+        return
+
+    cursor.execute('UPDATE foydalanuvchilar SET balans = balans - ? WHERE user_id=?', (VIP_ELON_NARX, user_id))
+    cursor.execute('UPDATE yuk_elonlar SET premium = 1 WHERE user_id=? AND sanasi=?', (user_id, sanasi))
+    conn.commit()
+
+    await query.edit_message_text(
+        "✅ VIP E'lon xizmati faollashtirildi!\n"
+        "📌 E'loningiz har doim yuqorida ko‘rinadi.\n"
+        "🎁 Bonus sifatida sizga 1 ta telefon raqamini bepul olish imkoniyati berildi.\n\n"
+        "Rahmat!"
+    )
+
+
+async def super_yuk_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = query.from_user.id
+    data = query.data.split('|')
+    sanasi = data[1]
+
+    cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id=?", (user_id,))
+    balans = cursor.fetchone()
+    if not balans or balans[0] < SUPER_ELON_NARX:
+        await query.answer("❌ Balansingiz yetarli emas. Balansni to‘ldiring.", show_alert=True)
+        return
+
+    cursor.execute('UPDATE foydalanuvchilar SET balans = balans - ? WHERE user_id=?', (SUPER_ELON_NARX, user_id))
+    cursor.execute('UPDATE yuk_elonlar SET premium = 2 WHERE user_id=? AND sanasi=?', (user_id, sanasi))
+    conn.commit()
+
+    await query.edit_message_text(
+        "✅ Super E'lon xizmati faollashtirildi!\n"
+        "🚀 E'loningiz barcha e'lonlardan yuqorida ko‘rsatiladi va alohida belgi bilan ajratiladi.\n"
+        "🎁 Bonus sifatida sizga 3 ta telefon raqamini bepul olish imkoniyati berildi.\n\n"
+        "Rahmat!"
+    )
+
 
 async def elon_muddat_tugashi(user_id, sanasi, context):
     await asyncio.sleep(24*60*60)
@@ -142,9 +188,7 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
                 [InlineKeyboardButton("🗑 E’lonni o‘chirish", callback_data=f"yuk_ochir_{elon[0]}")],
                 [InlineKeyboardButton("✅ E’lonni qoldirish", callback_data=f"yuk_qoldir_{elon[0]}")]
             ])
-        )
-
-async def yuk_ochir_qoldir_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        )async def yuk_ochir_qoldir_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data.split('_')
