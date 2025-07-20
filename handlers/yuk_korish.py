@@ -4,7 +4,7 @@ from database import cursor, conn
 from config import RAQAM_NARX
 from handlers.start import asosiy_menu
 
-# Yuk elonlarini viloyat bo'yicha chiqarish
+
 async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cursor.execute("SELECT viloyat, COUNT(*) FROM yuk_elonlar GROUP BY viloyat")
     viloyatlar = cursor.fetchall()
@@ -17,13 +17,11 @@ async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton(f"{viloyat} ({count} ta)", callback_data=f"viloyat_{viloyat}")]
         for viloyat, count in viloyatlar
     ]
-
     keyboard.append([InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")])
 
     await update.message.reply_text("Viloyatni tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# Tumanni ko‘rish
 async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -49,7 +47,6 @@ async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# E'lonlarni chiqarish
 async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -71,49 +68,45 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cursor.execute("UPDATE yuk_elonlar SET korilgan = korilgan + 1 WHERE id = ?", (elon_id,))
         conn.commit()
 
-        premium_text = ""
-        if premium == 2:
-            premium_text = "🌟 SUPER E'LON 🌟\n\n"
-        elif premium == 1:
-            premium_text = "💎 VIP E'LON 💎\n\n"
-
         text = (
-            f"{premium_text}"
-            f"🏷 ID: {elon_id}\n"
+            f"🏷 Yuk E’lon ID: {elon_id}\n"
             f"📍 Manzil: {viloyat}, {tuman}\n"
             f"🚩 Qayerdan: {qayerdan}\n"
             f"🏁 Qayerga: {qayerga}\n"
             f"⚖️ Og‘irligi: {ogirlik}\n"
-            f"🚚 Mashina: {mashina}\n"
+            f"🚚 Mashina turi: {mashina}\n"
             f"💰 Narx: {narx} so‘m\n"
             f"👁 Ko‘rilgan: {korilgan + 1} marta\n"
         )
 
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(f"📞 Raqam olish ({RAQAM_NARX} so‘m)", callback_data=f"yuk_raqam_{elon_id}")]
-        ])
+        if premium == 2:
+            text = "🌟 SUPER E'LON 🌟\n\n" + text
+        elif premium == 1:
+            text = "💎 VIP E'LON 💎\n\n" + text
+
+        keyboard = InlineKeyboardMarkup([[
+            InlineKeyboardButton(f"📞 Raqam olish ({RAQAM_NARX} so‘m)", callback_data=f"yuk_raqam_{elon_id}")
+        ]])
 
         await query.message.reply_text(text, reply_markup=keyboard)
 
     await query.message.reply_text(
         "Tanlang:",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("⬅️ Orqaga", callback_data=f"orqaga_tumanlar_{viloyat}"),
-             InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")]
+            [InlineKeyboardButton("⬅️ Orqaga", callback_data=f"orqaga_tumanlar_{viloyat}")],
+            [InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")]
         ])
     )
 
 
-# Orqaga viloyatlar
 async def orqaga_viloyatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     await yuk_korish(update, context)
 
 
-# Orqaga tumanlarasync def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    viloyat = query.data.split('_')[2]
-    context.match = viloyat  # agar kerak bo‘lsa
-    await tumanlar_korish(update, context)
+    data = query.data.split('_')
+    viloyat = data[2]await tumanlar_korish(update, context)
