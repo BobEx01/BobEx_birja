@@ -116,7 +116,6 @@ async def orqaga_tumanlar_shofyor(update: Update, context: ContextTypes.DEFAULT_
     await shofyor_tumanlar(update, context)
 
 
-# --- E'lon muddati tugashi uchun funksiya ---
 async def elon_muddat_tugashi(user_id, sanasi, context):
     await asyncio.sleep(24 * 60 * 60)  # 24 soat kutish
 
@@ -130,7 +129,6 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
         await context.bot.send_message(chat_id=user_id, text="⏳ E'loningiz muddati tugadi. Uzaytirasizmi?", reply_markup=keyboard)
 
 
-# --- Uzaytirish callback ---
 async def uzaytirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -148,7 +146,6 @@ async def uzaytirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     await query.edit_message_text("✅ E’loningiz muddati uzaytirildi.")
 
 
-# --- O'chirish callback ---
 async def ochirish_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
