@@ -188,7 +188,7 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
                 [InlineKeyboardButton("🗑 E’lonni o‘chirish", callback_data=f"yuk_ochir_{elon[0]}")],
                 [InlineKeyboardButton("✅ E’lonni qoldirish", callback_data=f"yuk_qoldir_{elon[0]}")]
             ])
-        )async def yuk_ochir_qoldir_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        async def yuk_ochir_qoldir_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data.split('_')
