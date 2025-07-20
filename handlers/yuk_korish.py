@@ -105,7 +105,8 @@ async def orqaga_viloyatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     await yuk_korish(update.callback_query, context)
 
-async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):query = update.callback_query
+async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
     await query.answer()
     viloyat = query.data.split('_')[2]
     context.user_data['viloyat'] = viloyat
