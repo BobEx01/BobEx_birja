@@ -19,13 +19,12 @@ async def raqam_olish_handler(update, context):
     if not result or result[0] < RAQAM_NARX:
         await query.edit_message_text(
             f"❌ Balansingiz yetarli emas. Raqam olish uchun {RAQAM_NARX} so‘m kerak.\n\n"
-            "💳 Balansingizni to‘ldiring: /hisobim"
+            "💳 Balansingizni to‘ldirish: /hisobim"
         )
         return
 
-    # Raqam olish
-    telefon = ''
-    elon_egasi = None
+    # Raqam olish va elon egasini aniqlash
+    telefon, elon_egasi = '', None
     if elon_turi == 'yuk':
         cursor.execute('SELECT telefon, user_id FROM yuk_elonlar WHERE id=?', (elon_id,))
     else:
@@ -40,17 +39,16 @@ async def raqam_olish_handler(update, context):
         await query.edit_message_text("❌ Kechirasiz, telefon raqami topilmadi.")
         return
 
-    # Balansdan yechish
-    cursor.execute('UPDATE foydalanuvchilar SET balans = balans - ? WHERE user_id=?',
-                   (RAQAM_NARX, user_id))
-    
+    # Balansdan pul yechish
+    cursor.execute('UPDATE foydalanuvchilar SET balans = balans - ? WHERE user_id=?', (RAQAM_NARX, user_id))
+
     # Logga yozish
     cursor.execute('''
     INSERT INTO raqamlar_olingan (user_id, elon_id, elon_turi, sanasi)
     VALUES (?, ?, ?, ?)
     ''', (user_id, elon_id, elon_turi, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
-    # KORILGAN +1
+    # Ko‘rilgan va raqam olingan sonini oshirish
     if elon_turi == 'yuk':
         cursor.execute('UPDATE yuk_elonlar SET korilgan = korilgan + 1, raqam_olingan = raqam_olingan + 1 WHERE id=?', (elon_id,))
     else:
@@ -63,7 +61,7 @@ async def raqam_olish_handler(update, context):
         "✅ Raqam muvaffaqiyatli olindi!"
     )
 
-    # ELON EGASIGA OG'OHLANTIRISH VA O‘CHIRISH/QOLDIRISH TUGMALARI
+    # ✅ Elon egasiga ogohlantirish va boshqarish tugmalari
     if elon_egasi:
         if elon_turi == 'yuk':
             ochir_callback = f"yuk_ochir_{elon_id}"
@@ -73,8 +71,8 @@ async def raqam_olish_handler(update, context):
             qoldir_callback = f"uzaytir_shofyor_{elon_id}"
 
         tugmalar = InlineKeyboardMarkup([
-            [InlineKeyboardButton("❌ E'lonni o‘chirish", callback_data=ochir_callback)],
-            [InlineKeyboardButton("✅ E'lonni qoldirish", callback_data=qoldir_callback)]
+            [InlineKeyboardButton("🗑 E’lonni o‘chirish", callback_data=ochir_callback)],
+            [InlineKeyboardButton("✅ E’lonni qoldirish", callback_data=qoldir_callback)]
         ])
 
         try:
@@ -82,9 +80,9 @@ async def raqam_olish_handler(update, context):
                 chat_id=elon_egasi,
                 text=(
                     f"📢 Sizning e’loningiz bo‘yicha raqamingiz olindi!\n"
-                    f"🆔 E'lon ID: {elon_id}\n"
+                    f"🆔 E’lon ID: {elon_id}\n"
                     f"📞 Sizning raqamingiz: {telefon}\n\n"
-                    "👇 Quyidagi tugmalar orqali e'loningizni boshqarishingiz mumkin."
+                    "👇 Quyidagi tugmalar orqali e’loningizni boshqarishingiz mumkin:"
                 ),
                 reply_markup=tugmalar
             )
