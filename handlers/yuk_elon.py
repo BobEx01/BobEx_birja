@@ -1,10 +1,10 @@
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 import datetime
 import asyncio
 from database import cursor, conn
-from handlers.start import asosiy_menu
 from config import VIP_ELON_NARX, SUPER_ELON_NARX
+from handlers.start import asosiy_menu
 
 
 def viloyatlar_keyboard():
@@ -103,53 +103,62 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     muddat = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
 
     cursor.execute('''INSERT INTO yuk_elonlar (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    ''', (
-        user_id,
-        context.user_data['viloyat'],
-        context.user_data['tuman'],
-        context.user_data['qayerdan'],
-        context.user_data['qayerga'],
-        context.user_data['ogirlik'],
-        context.user_data['mashina'],
-        context.user_data['narx'],
-        context.user_data['telefon'],
-        sanasi,
-        muddat
-    ))
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)''',
+                   (
+                       user_id,
+                       context.user_data['viloyat'],
+                       context.user_data['tuman'],
+                       context.user_data['qayerdan'],
+                       context.user_data['qayerga'],
+                       context.user_data['ogirlik'],
+                       context.user_data['mashina'],
+                       context.user_data['narx'],
+                       context.user_data['telefon'],
+                       sanasi,
+                       muddat
+                   ))
     conn.commit()
 
-    await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
-
     await update.message.reply_text(
-        "❗️ E’loningizni yanada ko‘proq odam ko‘rishini xohlaysizmi?\n\n"
-        f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m\n"
-        f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m\n"
-        "🎁 VIP: 1 ta raqam olish imkoniyati\n"
-        "🎁 Super: 3 ta raqam olish imkoniyati",
+        "✅ Yuk e’loningiz muvaffaqiyatli joylandi!\n\n"
+        "❗️ E’loningizni ko‘proq odam ko‘rishi uchun VIP yoki Super E'lon qilib faollashtiring:\n\n"
+        f"🔸 VIP E'lon — {VIP_ELON_NARX} so'm, 24 soat davomida ustunlik + 1 ta telefon raqam olish bonus.\n"
+        f"🌟 Super E'lon — {SUPER_ELON_NARX} so'm, barcha e'lonlardan yuqorida + 3 ta raqam olish bonus.",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔸 VIP e’lon qilish", callback_data=f"vip_yuk_{user_id}|{sanasi}")],
-            [InlineKeyboardButton("🌟 Super e’lon qilish", callback_data=f"super_yuk_{user_id}|{sanasi}")]
-        ])
+            [InlineKeyboardButton("🔸 VIP E’lon qilish", callback_data=f"vip_yuk_{user_id}|{sanasi}")],
+            [InlineKeyboardButton("🌟 Super E’lon qilish", callback_data=f"super_yuk_{user_id}|{sanasi}")]
+        ]),
+        parse_mode='Markdown'
     )
 
     asyncio.create_task(elon_muddat_tugashi(user_id, sanasi, context))
+
     await update.message.reply_text("🏠 Bosh menyuga qaytdingiz:", reply_markup=asosiy_menu())
     return -1
 
 
 async def elon_muddat_tugashi(user_id, sanasi, context):
     await asyncio.sleep(24 * 60 * 60)
-
     cursor.execute("SELECT * FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
     elon = cursor.fetchone()
     if elon:
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("✅ E'lonni O‘chirish", callback_data=f"ochir_yuk_{user_id}_{sanasi}")],
-            [InlineKeyboardButton("❌ Qoldirish", callback_data=f"qoldir_yuk_{user_id}_{sanasi}")]
+            [InlineKeyboardButton("✅ O‘chirish", callback_data=f"yuk_ochir_{user_id}_{sanasi}")],
+            [InlineKeyboardButton("❌ Qoldirish", callback_data=f"yuk_qoldir_{user_id}_{sanasi}")]
         ])
-        await context.bot.send_message(
-            chat_id=user_id,
-            text="⏳ E'loningiz muddati tugadi. O‘chirilsinmi yoki qoldirilsinmi?",
-            reply_markup=keyboard
-        )
+        await context.bot.send_message(chat_id=user_id,
+                                       text="⏰ E’loningiz muddati tugadi. Yangi mijozlar bo‘lishi uchun uzaytiring yoki o‘chirib yuboring.",
+                                       reply_markup=keyboard)
+
+
+async def yuk_ochir_qoldir_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    data = query.data.split('_')
+    amal, user_id, sanasi = data[1], int(data[2]), data[3]
+
+    if amal == 'ochir':
+        cursor.execute("DELETE FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
+        conn.commit()
+        await query.edit_message_text("🗑 E’loningiz o‘chirildi.")
+    elif amal == 'qoldir':
+        await query.edit_message_text("✅ E’loningiz qoldirildi va hali ham ko‘rsatilmoqda.")
