@@ -122,13 +122,15 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ Yuk e’loningiz muvaffaqiyatli joylandi!", reply_markup=ReplyKeyboardRemove())
 
     await update.message.reply_text(
-        "❗️ E’loningizni yanada ko‘proq odam ko‘rishini xohlaysizmi?\n\n"
-        f"🔸 VIP e’lon — {VIP_ELON_NARX} so‘m\n"
-        f"🌟 Super e’lon — {SUPER_ELON_NARX} so‘m\n",
+        "📣 E’loningizni ko‘proq ko‘rsatish uchun quyidagi xizmatlardan foydalaning:\n\n"
+        f"🔝 *VIP e’lon* — {VIP_ELON_NARX} so‘m: Oddiy e’lonlardan doim yuqorida.\n"
+        f"🚀 *SUPER e’lon* — {SUPER_ELON_NARX} so‘m: Barcha e’lonlar ustida ko‘rsatiladi.\n"
+        f"🎁 Bonus raqam olish imkoniyatlari mavjud!",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔸 VIP e’lon qilish", callback_data=f"vip_yuk_{user_id}|{sanasi}")],
-            [InlineKeyboardButton("🌟 Super e’lon qilish", callback_data=f"super_yuk_{user_id}|{sanasi}")]
-        ])
+            [InlineKeyboardButton("🔝 VIP e’lon qilish", callback_data=f"vip_yuk_{user_id}|{sanasi}")],
+            [InlineKeyboardButton("🚀 Super e’lon qilish", callback_data=f"super_yuk_{user_id}|{sanasi}")]
+        ]),
+        parse_mode='Markdown'
     )
 
     asyncio.create_task(elon_muddat_tugashi(user_id, sanasi, context))
@@ -147,38 +149,3 @@ async def elon_muddat_tugashi(user_id, sanasi, context):
             [InlineKeyboardButton("❌ O‘chirish", callback_data=f"ochir_{user_id}_{sanasi}")]
         ])
         await context.bot.send_message(chat_id=user_id, text="⏳ E'loningiz muddati tugadi. Uzaytirasizmi?", reply_markup=keyboard)
-
-
-async def vip_super_aktiv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    data = query.data.split('_')
-    tur = data[0]  # vip yoki super
-    user_id, sanasi = data[2].split('|')
-    user_id = int(user_id)
-
-    cursor.execute("SELECT balans FROM foydalanuvchilar WHERE user_id=?", (user_id,))
-    natija = cursor.fetchone()
-
-    if not natija:
-        await query.edit_message_text("❌ Balansingiz topilmadi.")
-        return
-
-    balans = natija[0]
-    narx = VIP_ELON_NARX if tur == 'vip' else SUPER_ELON_NARX
-
-    if balans < narx:
-        await query.edit_message_text("❌ Balansingiz yetarli emas.")
-        return
-
-    cursor.execute('''
-        UPDATE foydalanuvchilar SET balans = balans - ?, sarflangan = sarflangan + ? WHERE user_id=?
-    ''', (narx, narx, user_id))
-
-    cursor.execute('''
-        UPDATE yuk_elonlar SET premium = ? WHERE user_id=? AND sanasi=?
-    ''', (1 if tur == 'vip' else 2, user_id, sanasi))
-    conn.commit()
-
-    await query.edit_message_text(f"✅ E’loningiz {'VIP' if tur == 'vip' else 'Super'} holatga o‘tkazildi!")
