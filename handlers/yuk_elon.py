@@ -103,20 +103,20 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     muddat = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
 
     cursor.execute('''INSERT INTO yuk_elonlar (user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)''',
-                   (
-                       user_id,
-                       context.user_data['viloyat'],
-                       context.user_data['tuman'],
-                       context.user_data['qayerdan'],
-                       context.user_data['qayerga'],
-                       context.user_data['ogirlik'],
-                       context.user_data['mashina'],
-                       context.user_data['narx'],
-                       context.user_data['telefon'],
-                       sanasi,
-                       muddat
-                   ))
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+    ''', (
+        user_id,
+        context.user_data['viloyat'],
+        context.user_data['tuman'],
+        context.user_data['qayerdan'],
+        context.user_data['qayerga'],
+        context.user_data['ogirlik'],
+        context.user_data['mashina'],
+        context.user_data['narx'],
+        context.user_data['telefon'],
+        sanasi,
+        muddat
+    ))
     conn.commit()
 
     await update.message.reply_text(
@@ -139,26 +139,30 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def elon_muddat_tugashi(user_id, sanasi, context):
     await asyncio.sleep(24 * 60 * 60)
-    cursor.execute("SELECT * FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
+    cursor.execute("SELECT id FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
     elon = cursor.fetchone()
     if elon:
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("✅ O‘chirish", callback_data=f"yuk_ochir_{user_id}_{sanasi}")],
-            [InlineKeyboardButton("❌ Qoldirish", callback_data=f"yuk_qoldir_{user_id}_{sanasi}")]
+            [InlineKeyboardButton("🗑 O‘chirish", callback_data=f"yuk_ochir_yuk_{elon[0]}")],
+            [InlineKeyboardButton("✅ Qoldirish", callback_data=f"yuk_qoldir_yuk_{elon[0]}")]
         ])
-        await context.bot.send_message(chat_id=user_id,
-                                       text="⏰ E’loningiz muddati tugadi. Yangi mijozlar bo‘lishi uchun uzaytiring yoki o‘chirib yuboring.",
-                                       reply_markup=keyboard)
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="⏰ E’loningiz muddati tugadi. Yangi mijozlar bo‘lishi uchun uzaytiring yoki o‘chirib yuboring.",
+            reply_markup=keyboard
+        )
 
 
 async def yuk_ochir_qoldir_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     data = query.data.split('_')
-    amal, user_id, sanasi = data[1], int(data[2]), data[3]
+    amal, elon_turi, elon_id = data[1], data[2], int(data[3])
 
     if amal == 'ochir':
-        cursor.execute("DELETE FROM yuk_elonlar WHERE user_id=? AND sanasi=?", (user_id, sanasi))
-        conn.commit()
-        await query.edit_message_text("🗑 E’loningiz o‘chirildi.")
+        if elon_turi == 'yuk':
+            cursor.execute("DELETE FROM yuk_elonlar WHERE id=?", (elon_id,))
+            await query.edit_message_text("🗑 E’loningiz o‘chirildi.")
     elif amal == 'qoldir':
         await query.edit_message_text("✅ E’loningiz qoldirildi va hali ham ko‘rsatilmoqda.")
+
+    conn.commit()
