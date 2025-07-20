@@ -100,7 +100,9 @@ async def shofyor_elonlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("⬅️ Orqaga", callback_data=f"orqaga_tumanlar_shofyor_{viloyat}")],
         [InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")]
     ])
-    await query.message.reply_text("Tanlang:", reply_markup=nav_keyboard)async def orqaga_viloyatlar_shofyor(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await query.message.reply_text("Tanlang:", reply_markup=nav_keyboard)
+
+async def orqaga_viloyatlar_shofyor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     await shofyor_korish(update, context)
