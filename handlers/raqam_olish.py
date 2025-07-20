@@ -65,10 +65,16 @@ async def raqam_olish_handler(update, context):
 
     # ELON EGASIGA OG'OHLANTIRISH VA O‘CHIRISH/QOLDIRISH TUGMALARI
     if elon_egasi:
-        tugmalar = InlineKeyboardMarkup([
-            [InlineKeyboardButton("❌ E'lonni o‘chirish", callback_data=f"ochir_{elon_turi}_{elon_id}")],
-            [InlineKeyboardButton("✅ E'lonni qoldirish", callback_data=f"qoldir_{elon_turi}_{elon_id}")]
-        ])
+        if elon_turi == 'yuk':
+            tugmalar = InlineKeyboardMarkup([
+                [InlineKeyboardButton("❌ E'lonni o‘chirish", callback_data=f"yuk_ochir_{elon_id}")],
+                [InlineKeyboardButton("✅ E'lonni qoldirish", callback_data=f"yuk_qoldir_{elon_id}")]
+            ])
+        else:  # shofyor
+            tugmalar = InlineKeyboardMarkup([
+                [InlineKeyboardButton("❌ E'lonni o‘chirish", callback_data=f"ochir_shofyor_{elon_id}")],
+                [InlineKeyboardButton("✅ E'lonni qoldirish", callback_data=f"uzaytir_shofyor_{elon_id}")]
+            ])
 
         try:
             await context.bot.send_message(
