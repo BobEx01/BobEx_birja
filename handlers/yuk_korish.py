@@ -13,10 +13,8 @@ async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Hozircha yuk e’lonlari mavjud emas.")
         return
 
-    keyboard = [
-        [InlineKeyboardButton(f"{viloyat} ({count} ta)", callback_data=f"viloyat_{viloyat}")]
-        for viloyat, count in viloyatlar
-    ]
+    keyboard = [[InlineKeyboardButton(f"{viloyat} ({count} ta)", callback_data=f"viloyat_{viloyat}")]
+                for viloyat, count in viloyatlar]
     keyboard.append([InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")])
 
     await update.message.reply_text("Viloyatni tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
@@ -34,17 +32,16 @@ async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("Bu viloyatda hozircha e’lon mavjud emas.", reply_markup=asosiy_menu())
         return
 
-    keyboard = [
-        [InlineKeyboardButton(f"{tuman} ({count} ta)", callback_data=f"tuman_{viloyat}_{tuman}")]
-        for tuman, count in tumanlar
-    ]
+    keyboard = [[InlineKeyboardButton(f"{tuman} ({count} ta)", callback_data=f"tuman_{viloyat}_{tuman}")]
+                for tuman, count in tumanlar]
 
     keyboard.append([
         InlineKeyboardButton("⬅️ Orqaga", callback_data="orqaga_viloyatlar"),
         InlineKeyboardButton("🏠 Asosiy menyu", callback_data="asosiy_menyu")
     ])
 
-    await query.edit_message_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
+    await query.edit_message_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:",
+                                  reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -53,7 +50,7 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, viloyat, tuman = query.data.split('_')
 
     cursor.execute(
-        "SELECT id, qayerdan, qayerga, ogirlik, mashina, narx, premium, korilgan FROM yuk_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY premium DESC, sanasi DESC",
+        "SELECT id, qayerdan, qayerga, ogirlik, mashina, narx, premium, super, korilgan FROM yuk_elonlar WHERE viloyat = ? AND tuman = ? ORDER BY super DESC, premium DESC, sanasi DESC",
         (viloyat, tuman)
     )
     elonlar = cursor.fetchall()
@@ -63,12 +60,19 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     for elon in elonlar:
-        elon_id, qayerdan, qayerga, ogirlik, mashina, narx, premium, korilgan = elon
+        elon_id, qayerdan, qayerga, ogirlik, mashina, narx, premium, super, korilgan = elon
 
         cursor.execute("UPDATE yuk_elonlar SET korilgan = korilgan + 1 WHERE id = ?", (elon_id,))
         conn.commit()
 
+        status = ""
+        if super:
+            status = "🌟 SUPER E'LON 🌟\n"
+        elif premium:
+            status = "💎 VIP E'LON 💎\n"
+
         text = (
+            f"{status}"
             f"🏷 Yuk E’lon ID: {elon_id}\n"
             f"📍 Manzil: {viloyat}, {tuman}\n"
             f"🚩 Qayerdan: {qayerdan}\n"
@@ -79,14 +83,9 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"👁 Ko‘rilgan: {korilgan + 1} marta\n"
         )
 
-        if premium == 2:
-            text = "🌟 SUPER E'LON 🌟\n\n" + text
-        elif premium == 1:
-            text = "💎 VIP E'LON 💎\n\n" + text
-
-        keyboard = InlineKeyboardMarkup([[
-            InlineKeyboardButton(f"📞 Raqam olish ({RAQAM_NARX} so‘m)", callback_data=f"yuk_raqam_{elon_id}")
-        ]])
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(f"📞 Raqam olish ({RAQAM_NARX} so‘m)", callback_data=f"yuk_raqam_{elon_id}")]
+        ])
 
         await query.message.reply_text(text, reply_markup=keyboard)
 
@@ -109,4 +108,5 @@ async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data.split('_')
-    viloyat = data[2]await tumanlar_korish(update, context)
+    viloyat = data[2]
+    await tumanlar_korish(update, context)
