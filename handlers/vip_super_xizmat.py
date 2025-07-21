@@ -3,7 +3,6 @@ from telegram.ext import ContextTypes
 
 # --- Bonus paket qo'shish funksiyasi ---
 async def bonus_paket_qoshish(user_id: int, bonus_turi: str):
-    # bonus_turi: 'vip' yoki 'super'
     if bonus_turi == 'vip':
         bonus_miqdor = 1
     elif bonus_turi == 'super':
@@ -11,8 +10,7 @@ async def bonus_paket_qoshish(user_id: int, bonus_turi: str):
     else:
         bonus_miqdor = 0
 
-    # Bu yerga bazaga yozish logikasini joylashtiring
-    print(f"✅ User {user_id} uchun {bonus_turi} bonus ({bonus_miqdor} ta raqam olish huquqi) qo'shildi.")  # DEBUG
+    print(f"✅ User {user_id} uchun {bonus_turi} bonus ({bonus_miqdor} ta raqam olish huquqi) qo'shildi.")
 
 
 # --- VIP E'lon funksiyasi ---
@@ -90,11 +88,6 @@ async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_T
     query = update.callback_query
     await query.answer()
 
-if query.data == 'vip_tolov':
-    async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        query = update.callback_query
-        await query.answer()
-
     if query.data == 'vip_tolov':
         await query.edit_message_text(
             "💳 *VIP E'lon uchun to‘lov sahifasi:*\n"
@@ -112,7 +105,6 @@ if query.data == 'vip_tolov':
             "👉 [Super To‘lov Sahifasi](https://to'lovlinki/super)\n\n"
             "💵 Narxi: 90,000 so'm\n"
             "📆 Muddat: 24 soat\n"
-            "🎁 Bonus: 3 ta telefon raqam olish imkoniyati",
-            parse_mode='Markdown',
+            "🎁 Bonus: 3 ta telefon raqam olish imkoniyati",parse_mode='Markdown',
             disable_web_page_preview=True
         )
