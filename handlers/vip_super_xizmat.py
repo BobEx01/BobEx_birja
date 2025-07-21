@@ -91,22 +91,28 @@ async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_T
     await query.answer()
 
 if query.data == 'vip_tolov':
-    await query.edit_message_text(
-        "💳 *VIP E'lon uchun to‘lov sahifasi:*\n"
-        "👉 [VIP To‘lov Sahifasi](https://to'lovlinki/vip)\n\n"
-        "💵 Narxi: 45,000 so'm\n"
-        "📆 Muddat: 24 soat\n"
-        "🎁 Bonus: 1 ta telefon raqam olish imkoniyati",
-        parse_mode='Markdown',
-        disable_web_page_preview=True
-    )
-elif query.data == 'super_tolov':
-    await query.edit_message_text(
-        "💳 *Super E'lon uchun to‘lov sahifasi:*\n"
-        "👉 [Super To‘lov Sahifasi](https://to'lovlinki/super)\n\n"
-        "💵 Narxi: 90,000 so'm\n"
-        "📆 Muddat: 24 soat\n"
-        "🎁 Bonus: 3 ta telefon raqam olish imkoniyati",
-        parse_mode='Markdown',
-        disable_web_page_preview=True
-    )
+    async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == 'vip_tolov':
+        await query.edit_message_text(
+            "💳 *VIP E'lon uchun to‘lov sahifasi:*\n"
+            "👉 [VIP To‘lov Sahifasi](https://to'lovlinki/vip)\n\n"
+            "💵 Narxi: 45,000 so'm\n"
+            "📆 Muddat: 24 soat\n"
+            "🎁 Bonus: 1 ta telefon raqam olish imkoniyati",
+            parse_mode='Markdown',
+            disable_web_page_preview=True
+        )
+
+    elif query.data == 'super_tolov':
+        await query.edit_message_text(
+            "💳 *Super E'lon uchun to‘lov sahifasi:*\n"
+            "👉 [Super To‘lov Sahifasi](https://to'lovlinki/super)\n\n"
+            "💵 Narxi: 90,000 so'm\n"
+            "📆 Muddat: 24 soat\n"
+            "🎁 Bonus: 3 ta telefon raqam olish imkoniyati",
+            parse_mode='Markdown',
+            disable_web_page_preview=True
+        )
