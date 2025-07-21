@@ -104,7 +104,8 @@ async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_T
             disable_web_page_preview=True
         )
 
-    elif query.data == 'super_tolov':buttons = [
+    elif query.data == 'super_tolov':
+        buttons = [
             [InlineKeyboardButton("✅ Super E'lonni Aktivlashtirish", callback_data=f"super_elon_{query.from_user.id}")]
         ]
         await query.edit_message_text(
