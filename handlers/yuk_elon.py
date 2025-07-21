@@ -91,6 +91,7 @@ async def telefon_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     sanasi = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     muddat = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+
     cursor.execute('''INSERT INTO yuk_elonlar(user_id, viloyat, tuman, qayerdan, qayerga, ogirlik, mashina, narx, telefon, sanasi, muddat, premium)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)''',
         (
