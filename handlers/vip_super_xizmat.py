@@ -92,7 +92,7 @@ async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_T
 
 if query.data == 'vip_tolov':
     async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
+        query = update.callback_query
     await query.answer()
 
     if query.data == 'vip_tolov':
