@@ -110,8 +110,7 @@ async def orqaga_viloyatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # Orqaga tumanlar
-async def orqaga_tumanlar(update: Update, context: ContextTypes.
-                          DEFAULT_TYPE):
+async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data.split('_')
