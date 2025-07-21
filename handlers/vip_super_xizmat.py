@@ -27,7 +27,7 @@ async def vip_elon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     buttons = [
-        [InlineKeyboardButton("💳 VIP E'lon uchun to‘lash - 45,000 so'm", callback_data='vip_tolov')],
+        [InlineKeyboardButton("💳 VIP E'lon uchun to‘lash - 45,000 so'm", callback_data='vip_tolov')]
     ]
 
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode='Markdown')
@@ -47,7 +47,7 @@ async def super_elon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     buttons = [
-        [InlineKeyboardButton("💳 Super E'lon uchun to‘lash - 90,000 so'm", callback_data='super_tolov')],
+        [InlineKeyboardButton("💳 Super E'lon uchun to‘lash - 90,000 so'm", callback_data='super_tolov')]
     ]
 
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode='Markdown')
@@ -89,22 +89,32 @@ async def handle_vip_super_tolov(update: Update, context: ContextTypes.DEFAULT_T
     await query.answer()
 
     if query.data == 'vip_tolov':
+        buttons = [
+            [InlineKeyboardButton("✅ VIP E'lonni Aktivlashtirish", callback_data=f"vip_elon_{query.from_user.id}")]
+        ]
         await query.edit_message_text(
             "💳 *VIP E'lon uchun to‘lov sahifasi:*\n"
             "👉 [VIP To‘lov Sahifasi](https://to'lovlinki/vip)\n\n"
             "💵 Narxi: 45,000 so'm\n"
             "📆 Muddat: 24 soat\n"
-            "🎁 Bonus: 1 ta telefon raqam olish imkoniyati",
+            "🎁 Bonus: 1 ta telefon raqam olish imkoniyati\n\n"
+            "✅ To‘lovni amalga oshirgandan so‘ng quyidagi tugma orqali aktivlashtiring.",
+            reply_markup=InlineKeyboardMarkup(buttons),
             parse_mode='Markdown',
             disable_web_page_preview=True
         )
 
-    elif query.data == 'super_tolov':
+    elif query.data == 'super_tolov':buttons = [
+            [InlineKeyboardButton("✅ Super E'lonni Aktivlashtirish", callback_data=f"super_elon_{query.from_user.id}")]
+        ]
         await query.edit_message_text(
             "💳 *Super E'lon uchun to‘lov sahifasi:*\n"
             "👉 [Super To‘lov Sahifasi](https://to'lovlinki/super)\n\n"
             "💵 Narxi: 90,000 so'm\n"
             "📆 Muddat: 24 soat\n"
-            "🎁 Bonus: 3 ta telefon raqam olish imkoniyati",parse_mode='Markdown',
+            "🎁 Bonus: 3 ta telefon raqam olish imkoniyati\n\n"
+            "✅ To‘lovni amalga oshirgandan so‘ng quyidagi tugma orqali aktivlashtiring.",
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode='Markdown',
             disable_web_page_preview=True
         )
