@@ -22,7 +22,6 @@ async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("Viloyatni tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
 
-
 # Tumanlar bo'yicha yuk e'lonlarini ko'rish
 async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -47,7 +46,6 @@ async def tumanlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.edit_message_text(f"{viloyat} viloyati uchun tumanlardan birini tanlang:", reply_markup=InlineKeyboardMarkup(keyboard))
 
-
 # E'lonlarni ko‘rsatish
 async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -71,9 +69,9 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         conn.commit()
 
         text = ""
-        if premium == 2:
+        if int(premium) == 2:
             text += "🌟 SUPER E’LON 🌟\n\n"
-        elif premium == 1:
+        elif int(premium) == 1:
             text += "💎 VIP E’LON 💎\n\n"
 
         text += (
@@ -101,13 +99,11 @@ async def elonlar_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
     )
 
-
 # Orqaga viloyatlar
 async def orqaga_viloyatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     await yuk_korish(update, context)
-
 
 # Orqaga tumanlar
 async def orqaga_tumanlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
