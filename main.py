@@ -30,7 +30,6 @@ from handlers import (
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-
 def main():
     app = Application.builder().token(TOKEN).build()
 
