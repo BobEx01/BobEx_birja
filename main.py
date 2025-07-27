@@ -8,7 +8,7 @@ from telegram.ext import (
     filters,
 )
 
-from config import BOT_TOKEN  # Faqat mana bu joy yangilandi
+from config import BOT_TOKEN
 
 from handlers import (
     start,
@@ -94,7 +94,7 @@ def main():
             "mashina": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.mashina_qabul)],
             "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],
             "narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
-    "telefon": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.telefon_qabul)],
+            "telefon": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.telefon_qabul)],
         },
         fallbacks=[]
     )
