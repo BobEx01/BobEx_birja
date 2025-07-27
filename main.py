@@ -1,4 +1,5 @@
 import logging
+from telegram import Update
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -6,20 +7,20 @@ from telegram.ext import (
     MessageHandler,
     ConversationHandler,
     filters,
+    ContextTypes
 )
 
 from config import BOT_TOKEN
-
 from handlers import (
-    start,
-    hisobim,
-    hisob_tolidirish,
-    paketlar,
-    vip_super_xizmat,
-    yuk_elon,
-    yuk_korish,
-    shofyor_elon,
-    shofyor_korish,
+    start, 
+    hisobim, 
+    hisob_tolidirish, 
+    paketlar, 
+    vip_super_xizmat, 
+    yuk_elon, 
+    yuk_korish, 
+    shofyor_elon, 
+    shofyor_korish, 
     raqam_olish,
     admin_xabar,
     elonlarim,
@@ -27,13 +28,11 @@ from handlers import (
     bonus_va_promo
 )
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
 
 def main():
-    app = Application.builder().token(BOT_TOKEN).build()
+    app = Application.builder().token(TOKEN).build()
 
     # --- START ---
     app.add_handler(CommandHandler('start', start.boshlash))
@@ -47,12 +46,8 @@ def main():
     hisob_tolidirish_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^Hisobni to‘ldirish$"), hisob_tolidirish.hisobni_tolidirish_start)],
         states={
-            hisob_tolidirish.TOLOV_MIqdori: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, hisob_tolidirish.tolov_miqdori_qabul)
-            ],
-            hisob_tolidirish.TOLOV_CHEK: [
-                MessageHandler(filters.PHOTO, hisob_tolidirish.tolov_chek_qabul)
-            ]
+            hisob_tolidirish.TOLOV_MIqdori: [MessageHandler(filters.TEXT & ~filters.COMMAND, hisob_tolidirish.tolov_miqdori_qabul)],
+            hisob_tolidirish.TOLOV_CHEK: [MessageHandler(filters.PHOTO, hisob_tolidirish.tolov_chek_qabul)]
         },
         fallbacks=[MessageHandler(filters.Regex("^⬅️ Orqaga$"), hisob_tolidirish.ortga_qaytish)]
     )
@@ -83,9 +78,7 @@ def main():
         },
         fallbacks=[]
     )
-    app.add_handler(yuk_elon_conv)
-
-    # --- SHOFYOR ELON ---
+    app.add_handler(yuk_elon_conv)# --- SHOFYOR ELON ---
     shofyor_elon_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^🚚 Shofyor e'lon berish$"), shofyor_elon.shofyor_elon_start)],
         states={
@@ -142,5 +135,5 @@ def main():
     app.run_polling()
 
 
-if __name__ == "__main__":
+if __name__ == "main":
     main()
