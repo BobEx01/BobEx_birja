@@ -10,7 +10,7 @@ from telegram.ext import (
     ContextTypes
 )
 
-from config import TOKEN
+from config import BOT_TOKEN
 from handlers import (
     start, 
     hisobim, 
