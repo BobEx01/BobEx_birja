@@ -10,7 +10,8 @@ from telegram.ext import (
     ContextTypes
 )
 
-from config import BOT_TOKEN
+from config import BOT_TOKEN  # TO‘G‘RILANDI
+
 from handlers import (
     start, 
     hisobim, 
@@ -30,9 +31,8 @@ from handlers import (
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-
 def main():
-    app = Application.builder().token(TOKEN).build()
+    app = Application.builder().token(BOT_TOKEN).build()  # TO‘G‘RILANDI
 
     # --- START ---
     app.add_handler(CommandHandler('start', start.boshlash))
@@ -78,7 +78,9 @@ def main():
         },
         fallbacks=[]
     )
-    app.add_handler(yuk_elon_conv)# --- SHOFYOR ELON ---
+    app.add_handler(yuk_elon_conv)
+
+    # --- SHOFYOR ELON ---
     shofyor_elon_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^🚚 Shofyor e'lon berish$"), shofyor_elon.shofyor_elon_start)],
         states={
@@ -87,7 +89,7 @@ def main():
             "mashina": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.mashina_qabul)],
             "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],
             "narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
-            "telefon": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.telefon_qabul)],
+    "telefon": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.telefon_qabul)],
         },
         fallbacks=[]
     )
@@ -134,6 +136,5 @@ def main():
     print("🤖 BobEx Bot to‘liq ishga tushdi...")
     app.run_polling()
 
-
-if __name__ == "__main__":
+if __name__ == "__main__":  
     main()
