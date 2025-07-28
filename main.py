@@ -1,67 +1,18 @@
-import logging
-from telegram import Update
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    CallbackQueryHandler,
-    MessageHandler,
-    ConversationHandler,
-    filters,
-    ContextTypes
-)
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ConversationHandler, CallbackQueryHandler
+import yuk_elon
+import shofyor_elon
+import yuk_korish
+import shofyor_korish
+import raqam_olish
+import vip_super_xizmat
+import admin_xabar
+import elonlarim
+import pul_ishlash
 
-from config import BOT_TOKEN
-from handlers import (
-    start, 
-    hisobim, 
-    hisob_tolidirish, 
-    paketlar, 
-    vip_super_xizmat, 
-    yuk_elon, 
-    yuk_korish, 
-    shofyor_elon, 
-    shofyor_korish, 
-    raqam_olish,
-    admin_xabar,
-    elonlarim,
-    pul_ishlash,
-    bonus_va_promo
-)
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
+TOKEN = "7653469544:AAEuDWAsJTJ404V1AFIcx_lkJNUkLi_kgmU"
 
 def main():
     app = Application.builder().token(TOKEN).build()
-
-    # --- START ---
-    app.add_handler(CommandHandler('start', start.boshlash))
-    app.add_handler(CommandHandler('boshlash', start.boshlash))
-    app.add_handler(CommandHandler('foydalanuvchilar', start.foydalanuvchilar_cmd))
-    app.add_handler(MessageHandler(filters.Regex("^📊 Foydalanuvchilar soni$"), start.foydalanuvchilar_cmd))
-
-    # --- MENING HISOBIM ---
-    app.add_handler(MessageHandler(filters.Regex("^📊 Mening hisobim$"), hisobim.hisobim_handler))
-
-    hisob_tolidirish_conv = ConversationHandler(
-        entry_points=[MessageHandler(filters.Regex("^Hisobni to‘ldirish$"), hisob_tolidirish.hisobni_tolidirish_start)],
-        states={
-            hisob_tolidirish.TOLOV_MIqdori: [MessageHandler(filters.TEXT & ~filters.COMMAND, hisob_tolidirish.tolov_miqdori_qabul)],
-            hisob_tolidirish.TOLOV_CHEK: [MessageHandler(filters.PHOTO, hisob_tolidirish.tolov_chek_qabul)]
-        },
-        fallbacks=[MessageHandler(filters.Regex("^⬅️ Orqaga$"), hisob_tolidirish.ortga_qaytish)]
-    )
-    app.add_handler(hisob_tolidirish_conv)
-    app.add_handler(MessageHandler(filters.Regex(r'^/tasdiqla_'), hisob_tolidirish.admin_tasdiqlash))
-
-    # --- PAKETLAR ---
-    app.add_handler(MessageHandler(filters.Regex("^🎁 Paketlar$"), paketlar.paketlar_handler))
-    app.add_handler(CommandHandler('paket_ol', paketlar.paket_ol))
-    app.add_handler(CommandHandler('vip_paket_ol', paketlar.vip_paket_ol))
-    app.add_handler(CommandHandler('paket_stat', paketlar.paket_stat))
-
-    # --- BONUS VA PROMO ---
-    app.add_handler(CommandHandler('elon_bonus', bonus_va_promo.elon_bonus_taklif))
 
     # --- YUK ELON ---
     yuk_elon_conv = ConversationHandler(
@@ -78,7 +29,9 @@ def main():
         },
         fallbacks=[]
     )
-    app.add_handler(yuk_elon_conv)# --- SHOFYOR ELON ---
+    app.add_handler(yuk_elon_conv)
+
+    # --- SHOFYOR ELON ---
     shofyor_elon_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^🚚 Shofyor e'lon berish$"), shofyor_elon.shofyor_elon_start)],
         states={
@@ -117,7 +70,6 @@ def main():
 
     # --- YUK UZAYTIRISH/OCHIRISH ---
     app.add_handler(CallbackQueryHandler(yuk_elon.yuk_ochir_qoldir_callback, pattern='^(yuk_ochir|yuk_qoldir)_'))
-
     # --- SHOFYOR UZAYTIRISH/OCHIRISH ---
     app.add_handler(CallbackQueryHandler(shofyor_elon.uzaytirish_callback, pattern='^uzaytir_shofyor_'))
     app.add_handler(CallbackQueryHandler(shofyor_elon.ochirish_callback, pattern='^ochir_shofyor_'))
@@ -133,7 +85,6 @@ def main():
 
     print("🤖 BobEx Bot to‘liq ishga tushdi...")
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
