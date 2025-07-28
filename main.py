@@ -10,7 +10,7 @@ from telegram.ext import (
     ContextTypes
 )
 
-from config import BOT_TOKEN 
+from config import TOKEN 
 from handlers import (
     start, 
     hisobim, 
@@ -32,7 +32,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 
 def main():
-    app = Application.builder().token(BOT_TOKEN).build()
+    app = Application.builder().token(TOKEN).build()
 
     # --- START ---
     app.add_handler(CommandHandler('start', start.boshlash))
