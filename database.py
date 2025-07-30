@@ -161,6 +161,7 @@ class Database:
                 elon_id
             )
 
+
 # Ishga tushurish
 db = Database()
 
