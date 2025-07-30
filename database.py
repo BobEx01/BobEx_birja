@@ -111,7 +111,8 @@ class Database:
                 miqdor, user_id
             )
 
-    async def balans_olish(self, user_id):async with self.pool.acquire() as conn:
+    async def balans_olish(self, user_id):
+        async with self.pool.acquire() as conn:
             result = await conn.fetchrow(
                 "SELECT balans FROM foydalanuvchilar WHERE user_id = $1",
                 user_id
