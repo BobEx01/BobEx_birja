@@ -109,7 +109,8 @@ class Database:
     # === BALANS VA TO‘LOVLAR ===
     async def balans_oshirish(self, user_id, miqdor):
         async with self.pool.acquire() as conn:
-            await conn.execute("UPDATE foydalanuvchilar SET balans = balans + $1 WHERE user_id = $2", miqdor, user_id)async def balans_olish(self, user_id):
+            await conn.execute("UPDATE foydalanuvchilar SET balans = balans + $1 WHERE user_id = $2", miqdor, user_id)
+            async def balans_olish(self, user_id):
         async with self.pool.acquire() as conn:
             result = await conn.fetchrow("SELECT balans FROM foydalanuvchilar WHERE user_id = $1", user_id)
             return result["balans"] if result else 0
