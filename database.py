@@ -4,7 +4,7 @@ from datetime import datetime
 DB_URL = "postgresql://postgres:GyfySBHYtMgPaAGvMhkxAkONuhanoMtT@postgres.railway.internal:5432/railway"
 
 class Database:
-    def __init__(self):
+    def init__(self):  # ⚠️ To'g'rilandi: init → __init
         self.pool = None
 
     async def init(self):
@@ -109,10 +109,15 @@ class Database:
     # === BALANS VA TO‘LOVLAR ===
     async def balans_oshirish(self, user_id, miqdor):
         async with self.pool.acquire() as conn:
-            await conn.execute("UPDATE foydalanuvchilar SET balans = balans + $1 WHERE user_id = $2", miqdor, user_id)
-            async def balans_olish(self, user_id):
+            await conn.execute("UPDATE foydalanuvchilar SET balans = balans + $1 WHERE user_id = $2",
+                miqdor, user_id
+            )
+
+    async def balans_olish(self, user_id):  # ⚠️ Oldingi xato: funksiyani boshqa funksiya ichida yozib yuborilgan
         async with self.pool.acquire() as conn:
-            result = await conn.fetchrow("SELECT balans FROM foydalanuvchilar WHERE user_id = $1", user_id)
+            result = await conn.fetchrow(
+                "SELECT balans FROM foydalanuvchilar WHERE user_id = $1", user_id
+            )
             return result["balans"] if result else 0
 
     async def tolov_log_qoshish(self, user_id, summa, sana, izoh):
@@ -132,20 +137,31 @@ class Database:
 
     async def raqam_olingan_soni_yuk(self, elon_id):
         async with self.pool.acquire() as conn:
-            await conn.execute("UPDATE yuk_elonlar SET raqam_olingan = raqam_olingan + 1 WHERE id = $1", elon_id)
+            await conn.execute(
+                "UPDATE yuk_elonlar SET raqam_olingan = raqam_olingan + 1 WHERE id = $1",
+                elon_id
+            )
 
     async def raqam_olingan_soni_shofyor(self, elon_id):
         async with self.pool.acquire() as conn:
-            await conn.execute("UPDATE shofyor_elonlar SET raqam_olingan = raqam_olingan + 1 WHERE id = $1", elon_id)
+            await conn.execute(
+                "UPDATE shofyor_elonlar SET raqam_olingan = raqam_olingan + 1 WHERE id = $1",
+                elon_id
+            )
 
     async def elon_korilgan_yuk(self, elon_id):
         async with self.pool.acquire() as conn:
-            await conn.execute("UPDATE yuk_elonlar SET korilgan = korilgan + 1 WHERE id = $1", elon_id)
+            await conn.execute(
+                "UPDATE yuk_elonlar SET korilgan = korilgan + 1 WHERE id = $1",
+                elon_id
+            )
 
     async def elon_korilgan_shofyor(self, elon_id):
         async with self.pool.acquire() as conn:
-            await conn.execute("UPDATE shofyor_elonlar SET korilgan = korilgan + 1 WHERE id = $1", elon_id)
-
+            await conn.execute(
+                "UPDATE shofyor_elonlar SET korilgan = korilgan + 1 WHERE id = $1",
+                elon_id
+            )
 
 # === ISHGA TUSHURISH ===
 db = Database()
