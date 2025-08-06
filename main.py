@@ -1,26 +1,27 @@
 import logging
-from telegram import Update
 from telegram.ext import (
     Application,
     CommandHandler,
     CallbackQueryHandler,
     MessageHandler,
     ConversationHandler,
-    filters,
-    ContextTypes
+    filters
 )
 
-from config import TOKEN 
+from config import BOT_TOKEN
+from database import init_db
+
+# Barcha handlers import
 from handlers import (
-    start, 
-    hisobim, 
-    hisob_tolidirish, 
-    paketlar, 
-    vip_super_xizmat, 
-    yuk_elon, 
-    yuk_korish, 
-    shofyor_elon, 
-    shofyor_korish, 
+    start,
+    hisobim,
+    hisob_tolidirish,
+    paketlar,
+    vip_super_xizmat,
+    yuk_elon,
+    yuk_korish,
+    shofyor_elon,
+    shofyor_korish,
     raqam_olish,
     admin_xabar,
     elonlarim,
@@ -28,11 +29,18 @@ from handlers import (
     bonus_va_promo
 )
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 
 def main():
-    app = Application.builder().token(TOKEN).build()
+    # Bazani ishga tayyorlash
+    init_db()
+
+    app = Application.builder().token(BOT_TOKEN).build()
 
     # --- START ---
     app.add_handler(CommandHandler('start', start.boshlash))
@@ -43,6 +51,7 @@ def main():
     # --- MENING HISOBIM ---
     app.add_handler(MessageHandler(filters.Regex("^📊 Mening hisobim$"), hisobim.hisobim_handler))
 
+    # --- HISOB TO‘LDIRISH ---
     hisob_tolidirish_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^Hisobni to‘ldirish$"), hisob_tolidirish.hisobni_tolidirish_start)],
         states={
@@ -78,15 +87,16 @@ def main():
         },
         fallbacks=[]
     )
-    app.add_handler(yuk_elon_conv)# --- SHOFYOR ELON ---
+    app.add_handler(yuk_elon_conv)
+
+    # --- SHOFYOR ELON ---
     shofyor_elon_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^🚚 Shofyor e'lon berish$"), shofyor_elon.shofyor_elon_start)],
         states={
             "viloyat": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.viloyat_qabul)],
             "tuman": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.tuman_qabul)],
             "mashina": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.mashina_qabul)],
-            "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],
-            "narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
+            "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],"narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
             "telefon": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.telefon_qabul)],
         },
         fallbacks=[]
@@ -132,8 +142,10 @@ def main():
     app.add_handler(MessageHandler(filters.Regex("^💸 Pul ishlash$"), pul_ishlash.pul_ishlash_handler))
 
     print("🤖 BobEx Bot to‘liq ishga tushdi...")
-    app.run_polling()
+    app.run_polling(drop_pending_updates=True)
 
 
-if __name__ == "__main__":
+if name == "__main__":
+    if not BOT_TOKEN:
+        raise RuntimeError("BOT_TOKEN ENV o‘zgaruvchisi topilmadi. Railway Variables ga BOT_TOKEN qo‘shing.")
     main()
