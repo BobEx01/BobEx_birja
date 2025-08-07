@@ -145,7 +145,5 @@ def main():
     app.run_polling(drop_pending_updates=True)
 
 
-if __name__ == "__main__":  # to‘g‘ridan-to‘g‘ri ishga tushganda
-    if not BOT_TOKEN:
-        raise RuntimeError("BOT_TOKEN ENV o‘zgaruvchisi topilmadi. Railway Variables ga BOT_TOKEN qo‘shing.")
-    main()
+if __name__ == "__main__":
+    
