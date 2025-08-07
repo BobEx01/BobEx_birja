@@ -9,7 +9,7 @@ from telegram.ext import (
 )
 
 from config import BOT_TOKEN
-from database import init_db
+from database import init_db  # Bazani yaratish funksiyasi
 
 # Barcha handlers import
 from handlers import (
@@ -33,11 +33,10 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
-logger = logging.getLogger(__name__)
-
+logger = logging.getLogger(__name__)  # name to‘g‘rilandi
 
 def main():
-    # Bazani ishga tayyorlash
+    # ✅ 1. BAZA JADVALLARINI YARATISH
     init_db()
 
     app = Application.builder().token(BOT_TOKEN).build()
@@ -96,7 +95,8 @@ def main():
             "viloyat": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.viloyat_qabul)],
             "tuman": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.tuman_qabul)],
             "mashina": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.mashina_qabul)],
-            "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],"narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
+            "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],
+            "narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
             "telefon": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.telefon_qabul)],
         },
         fallbacks=[]
@@ -145,7 +145,7 @@ def main():
     app.run_polling(drop_pending_updates=True)
 
 
-if __name__ == "__main__":
+if name == "__main__":  # to‘g‘ridan-to‘g‘ri ishga tushganda
     if not BOT_TOKEN:
         raise RuntimeError("BOT_TOKEN ENV o‘zgaruvchisi topilmadi. Railway Variables ga BOT_TOKEN qo‘shing.")
     main()
