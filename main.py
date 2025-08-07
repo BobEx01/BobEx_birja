@@ -33,17 +33,16 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
-logger = logging.getLogger(__name__)  # name to‘g‘rilandi
+logger = logging.getLogger(__name__)  # ✅ to‘g‘risi name
 
 def main():
-    # ✅ 1. BAZA JADVALLARINI YARATISH
     init_db()
 
     app = Application.builder().token(BOT_TOKEN).build()
 
     # --- START ---
-    app.add_handler(CommandHandler('start', start.boshlash))
-    app.add_handler(CommandHandler('boshlash', start.boshlash))
+    app.add_handler(CommandHandler('start', start.start_cmd))  # ✅
+    app.add_handler(CommandHandler('boshlash', start.start_cmd))  # ✅
     app.add_handler(CommandHandler('foydalanuvchilar', start.foydalanuvchilar_cmd))
     app.add_handler(MessageHandler(filters.Regex("^📊 Foydalanuvchilar soni$"), start.foydalanuvchilar_cmd))
 
@@ -95,8 +94,7 @@ def main():
             "viloyat": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.viloyat_qabul)],
             "tuman": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.tuman_qabul)],
             "mashina": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.mashina_qabul)],
-            "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],
-            "narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
+            "sigim": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.sigim_qabul)],"narx": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.narx_qabul)],
             "telefon": [MessageHandler(filters.TEXT & ~filters.COMMAND, shofyor_elon.telefon_qabul)],
         },
         fallbacks=[]
@@ -144,6 +142,8 @@ def main():
     print("🤖 BobEx Bot to‘liq ishga tushdi...")
     app.run_polling(drop_pending_updates=True)
 
-
+# ✅ TO‘G‘RI YOZILISHI:
 if __name__ == "__main__":
-    
+    if not BOT_TOKEN:
+        raise RuntimeError("BOT_TOKEN ENV o‘zgaruvchisi topilmadi. Railway Variables ga BOT_TOKEN qo‘shing.")
+    main()
