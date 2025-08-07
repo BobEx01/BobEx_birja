@@ -1,4 +1,3 @@
-# handlers/start.py
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
 from keyboards.menu import main_menu
@@ -66,3 +65,6 @@ def register_start_handlers(app):
     app.add_handler(MessageHandler(filters.Regex("^ℹ️ Yordam$"), show_help))
     app.add_handler(MessageHandler(filters.Regex("^💳 Balans$"), show_balance))
     app.add_handler(MessageHandler(filters.Regex("^📄 E'lonlarni ko'rish$"), show_channels))
+
+# 👇 Bu qator xatoni hal qiladi:
+asosiy_menu = main_menu
