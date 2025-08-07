@@ -1,3 +1,5 @@
+# handlers/start.py
+
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
 from keyboards.menu import main_menu
@@ -11,9 +13,9 @@ WELCOME = (
     "📌 Pastdagi menyudan kerakli bo‘limni tanlang."
 )
 
-async def start_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# START komandasi
+async def boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    # foydalanuvchini ro‘yxatdan o‘tkazamiz
     cursor.execute(
         "INSERT OR IGNORE INTO foydalanuvchilar (user_id, username, first_name) VALUES (?, ?, ?)",
         (user.id, user.username or "", user.first_name or "")
@@ -22,6 +24,7 @@ async def start_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(WELCOME, reply_markup=main_menu())
 
+# Yordam bo‘limi
 async def show_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "ℹ️ <b>Yordam bo‘limi</b>\n\n"
@@ -32,10 +35,11 @@ async def show_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(text, reply_markup=main_menu(), parse_mode="HTML")
 
+# Balans ko‘rsatish
 async def show_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_user.id
     cursor.execute(
-        "SELECT balans, sarflangan, toldirilgan FROM foydalanuvchilar WHERE user_id = %s",
+        "SELECT balans, sarflangan, toldirilgan FROM foydalanuvchilar WHERE user_id = ?",
         (uid,)
     )
     row = cursor.fetchone()
@@ -50,6 +54,7 @@ async def show_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=main_menu()
     )
 
+# Kanallar ro‘yxati
 async def show_channels(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "📄 <b>E'lonlar kanallari</b>\n\n"
@@ -60,11 +65,16 @@ async def show_channels(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(text, reply_markup=main_menu(), parse_mode="HTML")
 
+# Foydalanuvchilar soni
+async def foydalanuvchilar_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    soni = foydalanuvchilar_soni()
+    await update.message.reply_text(f"📊 Foydalanuvchilar soni: {soni} ta")
+
+# Hammasini ro‘yxatdan o‘tkazish uchun
 def register_start_handlers(app):
-    app.add_handler(CommandHandler("start", start_cmd))
+    app.add_handler(CommandHandler("start", boshlash))
     app.add_handler(MessageHandler(filters.Regex("^ℹ️ Yordam$"), show_help))
     app.add_handler(MessageHandler(filters.Regex("^💳 Balans$"), show_balance))
     app.add_handler(MessageHandler(filters.Regex("^📄 E'lonlarni ko'rish$"), show_channels))
-
-# 👇 Bu qator xatoni hal qiladi:
-asosiy_menu = main_menu
+    app.add_handler(CommandHandler("foydalanuvchilar", foydalanuvchilar_cmd))
+    app.add_handler(MessageHandler(filters.Regex("^📊 Foydalanuvchilar soni$"), foydalanuvchilar_cmd))
