@@ -1,7 +1,7 @@
 from database import cursor, conn
 from datetime import datetime, timedelta
 from config import PAKET_10_NARX, VIP_NARX, ADMIN_ID
-from handlers.start import asosiy_menu
+from keyboards.menu import main_menu as asosiy_menu
 
 async def paketlar_handler(update, context):
     text = (
