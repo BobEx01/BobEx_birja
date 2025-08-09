@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from database import cursor
-from handlers.start import asosiy_menu
+from keyboards.menu import main_menu as asosiy_menu
 
 async def elonlarim_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
