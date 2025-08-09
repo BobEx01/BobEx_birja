@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from database import cursor, conn
-from handlers.start import asosiy_menu
+from keyboards.menu import main_menu
 
 BONUS_MIqdori = 50000
 REFERAL_BONUS = 2000
