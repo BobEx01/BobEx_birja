@@ -2,7 +2,8 @@ from database import cursor, conn
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from config import RAQAM_NARX, VIP_ELON_NARX, SUPER_ELON_NARX
-from handlers.start import asosiy_menu
+from keyboards.menu import main_menu
+asosiy_menu = main_menu
 import datetime
 import asyncio
 
