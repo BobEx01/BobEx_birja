@@ -2,7 +2,7 @@ from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, InlineKey
 from telegram.ext import ContextTypes
 from database import cursor, conn, foydalanuvchi_mavjudmi
 from config import VIP_ELON_NARX, SUPER_ELON_NARX
-from handlers.start import asosiy_menu
+from keyboards.menu import main_menu as asosiy_menu
 import datetime
 import asyncio
 
