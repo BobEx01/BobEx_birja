@@ -1,7 +1,7 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 from database import cursor, conn
-from handlers.start import asosiy_menu
+from keyboards.menu import main_menu as asosiy_menu
 
 ADMIN_ID = 8080091052
 
