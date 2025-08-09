@@ -2,7 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from database import cursor, conn
 from config import RAQAM_NARX
-from handlers.start import asosiy_menu
+from keyboards.menu import main_menu as asosiy_menu
 
 # Viloyatlar bo'yicha yuk e'lonlarini ko'rish
 async def yuk_korish(update: Update, context: ContextTypes.DEFAULT_TYPE):
