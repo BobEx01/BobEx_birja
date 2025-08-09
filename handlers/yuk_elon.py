@@ -4,7 +4,8 @@ import datetime
 import asyncio
 from database import cursor, conn
 from config import VIP_ELON_NARX, SUPER_ELON_NARX
-from handlers.start import asosiy_menu
+from keyboards.menu import main_menu
+asosiy_menu = main_menu
 
 def viloyatlar_keyboard():
     viloyatlar = ["Toshkent", "Andijon", "Farg'ona", "Namangan",
